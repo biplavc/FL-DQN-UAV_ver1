@@ -1,21 +1,16 @@
-import cv2
-import gym
+# import gym
 import numpy as np
 
 from collections import deque
-from gym import spaces
 
 import time
 
-import gym
-import gym.spaces
+
 import math
 import random
-import numpy as np
 from collections import namedtuple
 from itertools import count
 from copy import deepcopy
-from PIL import Image
 
 import torch
 import torch.nn as nn
@@ -27,6 +22,8 @@ import torchvision.transforms as T
 import os
 import datetime
 import json
+
+from gym_UAV import *
 
 os.environ['CUDA_VISIBLE_DEVICES'] = "1"
 
