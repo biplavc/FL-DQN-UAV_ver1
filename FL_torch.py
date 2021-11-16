@@ -36,7 +36,7 @@ class ARGS():
         self.env_name = UAV_network(3, {0:[1,2,3]}, "UAV_network", "None", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1})
 
         self.render = False
-        self.episodes = 1500
+        self.episodes = 15_000
         self.batch_size = 32
         self.epsilon_start = 1.0
         self.epsilon_final=0.02
@@ -66,7 +66,7 @@ def set_seed(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
 
-
+# each agent has a name, the main federator has name main while the other agents has the number as the name
 
 class FederatedLearning:
     

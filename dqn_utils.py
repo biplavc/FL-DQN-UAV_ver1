@@ -54,24 +54,34 @@ class ReplayMemory():
 class DQN(nn.Module):
     def __init__(self, num_actions):
         super(DQN, self).__init__()
-        self.conv1 = nn.Conv2d(4, 32, kernel_size=8, stride=4, padding=0)
-        # self.bn1 = nn.BatchNorm2d(16)
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=0)
-        # self.bn2 = nn.BatchNorm2d(32)
-        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=0)
-        # self.bn3 = nn.BatchNorm2d(64)
+        # self.conv1 = nn.Conv2d(4, 32, kernel_size=8, stride=4, padding=0)
+        # # self.bn1 = nn.BatchNorm2d(16)
+        # self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=0)
+        # # self.bn2 = nn.BatchNorm2d(32)
+        # self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=0)
+        # # self.bn3 = nn.BatchNorm2d(64)
         
-        self.fc1 = nn.Linear(7 * 7 * 64, 512)
-        self.fc2 = nn.Linear(512, num_actions)
+        self.h1 = nn.Linear(state_size, 64)
+        self.h2 = nn.Linear(64, 64)
+        self.h3 = nn.Linear(64, 64)
+        self.h4 = nn.Linear(64, 64)
+        self.h5 = nn.Linear(64, 64)
+        self.h6 = nn.Linear(64, 64)
+        self.h7 = nn.Linear(64, num_actions)
         
     def forward(self, inputs):
-        out = F.relu(self.conv1(inputs))
-        out = F.relu(self.conv2(out))
-        out = F.relu(self.conv3(out))
+        out = F.relu(self.h1(inputs))
+        out = F.relu(self.h2(out))
+        out = F.relu(self.h3(out))
+        out = F.relu(self.h4(out))
+        out = F.relu(self.h5(out))
+        out = F.relu(self.h6(out))
+        out = F.relu(self.h7(out))
+
         
-        out = out.view(out.size(0), -1)
-        out = F.relu(self.fc1(out))
-        out = self.fc2(out)
+        # out = out.view(out.size(0), -1)
+        # out = F.relu(self.fc1(out))
+        # out = self.fc2(out)
         
         return out
 
