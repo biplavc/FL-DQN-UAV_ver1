@@ -1,5 +1,6 @@
 from gym import Env
 from gym.spaces import Discrete, Box
+import gym
 import numpy as np
 import random
 import functools
@@ -96,19 +97,12 @@ class UAV_network(Env):   # network of UAVs not just a single one
         
         
         self.start_network(packet_update_loss, packet_sample_loss)
-        
-        # print(f"sample_loss = {self.sample_loss}, update_loss = {self.update_loss}")
-
         self.create_action_space()
         self.action_space = Discrete(self.action_size)
 
         self.observation_space =  Box(low=0.0, high=MAX_STEPS+1, shape=(2*(n_users)+1, 1), dtype=np.int)
 
-        self.state = np.concatenate((list([self.current_step]), [1]*2*(n_users)), axis=None) #
-
-        # if verbose:
-        # print(f"initial state is {self._state} with length {np.shape(self._state)} when CSI_as_state = {CSI_as_state} and sample_error_in_CSI = {sample_error_in_CSI}")  
-              
+        self.state = np.concatenate((list([self.current_step]), [1]*2*(n_users)), axis=None)              
         self._episode_ended = False
         
     def update_act_coverage(self):
