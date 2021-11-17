@@ -1,0 +1,6 @@
+* start from FL_torch.py, set up args for the FederatedLearning(args), directories. Among the args, self.env_name will have the UAV_network properties.
+
+* using the args, the FederatedLearning(args) will set up the main agent in def __init__(self, args). Agent PongAgent is the learning agent with name "main" that will be set up when FederatedLearning(args) is called. see below
+
+** PongAgent is in dqn_utils.py
+**  

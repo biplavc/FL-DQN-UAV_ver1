@@ -23,6 +23,7 @@ import datetime
 import json
 
 from gym_UAV import *
+from atari_utils import *
 
 class ReplayMemory():
     def __init__(self, capacity):
@@ -86,15 +87,30 @@ class DQN(nn.Module):
         return out
 
 
+def make_env(env_name, UAV_args):
+    # env = gym.make(env_name, UAV_args) ## biplav
+    env = UAV_network(UAV_args.n_users, UAV_args.coverage, UAV_args.name, UAV_args.folder_name, UAV_args.packet_update_loss, UAV_args.packet_sample_loss, UAV_args.periodicity)
+    env = MaxAndSkipEnv(env)
+    # env = FireResetEnv(env) ## not needed as Take action on reset for environments that are fixed until firing -- https://github.com/openai/baselines/blob/master/baselines/common/atari_wrappers.py
+    # env = ProcessFrame84(env) 
+    # env = ImageToPyTorch(env)
+    env = BufferWrapper(env, 4) ## biplav, need some clarity
+    # return ScaledFloatFrame(env) ## biplav
+    return env
+
+
 
 class PongAgent:
-    def __init__(self, args, name = ""):
-        # self.env = make_env(args.env_name)
-        self.env = UAV_network(3, {0:[1,2,3]}, "UAV_network", "None", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1}) ## biplav
+    def __init__(self, args, name = "", UAV_args = UAV_args):
+        self.env = make_env(args.env_name, UAV_args)
+        # self.env = UAV_network(3, {0:[1,2,3]}, "UAV_network", "None", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1}) ## biplav
         self.num_actions = self.env.action_space.n
         
         self.args = args
         self.name = name
+        self.UAV_args = UAV_args
+
+        print(f"inside PongAgent - num_actions = {self.num_actions}, args = {self.args}, name = {self.name}, UAV_args = {self.UAV_args}")
         
         self.dqn = DQN(self.num_actions)
         self.target_dqn = DQN(self.num_actions)
@@ -228,7 +244,7 @@ class PongAgent:
 
                 
         # main loop - iterate over episodes
-        for i in range(1, episodes + 1):
+        for i in range(0, episodes): ## biplav
             # reset the environment
             done = False
             state = self.env.reset()

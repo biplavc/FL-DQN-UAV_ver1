@@ -4,6 +4,7 @@ import numpy as np
 from collections import deque
 
 import time
+import datetime
 
 
 import math
@@ -59,6 +60,16 @@ class ARGS():
         
         self.replay_buffer_fill_len = 1_000
         
+## self, n_users, coverage, name, folder_name, packet_update_loss, packet_sample_loss, periodicity
+class UAV_ARGS():
+    def __init__(self, n_users, coverage, name, folder_name, packet_update_loss, packet_sample_loss, periodicity):
+        self.n_users = n_users
+        self.coverage = coverage
+        self.name = name
+        self.folder_name = folder_name
+        self.packet_update_loss = packet_update_loss
+        self.packet_sample_loss = packet_sample_loss
+        self.periodicity = periodicity
         
 def set_seed(seed):
     random.seed(seed)
@@ -70,9 +81,10 @@ def set_seed(seed):
 
 class FederatedLearning:
     
-    def __init__(self, args):
+    def __init__(self, args, UAV_args):
         self.args = args
-        self.main_agent = PongAgent(args, "main")
+        self.main_agent = PongAgent(args, name  ="main", UAV_args = UAV_args)
+        # self, args, name = "", UAV_args = UAV_args
         
         self.create_clients()
         
@@ -201,7 +213,7 @@ class FederatedLearning:
                 epsilon_final = self.args.epsilon_final,
                 sync_target_net_freq = self.args.sync_target_net_freq)
             
-            print(f'LOCAL TRAIN: Avg Reward: {np.array(rewards).mean():.5f},  Avg Running Reward: {np.array(running_rewards).mean():.5f}')
+            print(f'LOCAL TRAIN: Avg Reward: {np.array(rewards).mean():.2f},  Avg Running Reward: {np.array(running_rewards).mean():.2f}')
             
 
             self.logs[f"{round_no}"]["train"]["rewards"].append(rewards)
@@ -233,8 +245,8 @@ class FederatedLearning:
                 
             self.step(idxs_users, round_no+1)
             print(f'{round_no + 1}/{self.args.rounds}')
-            print(f'TRAIN: Avg Reward: {np.array(self.logs[f"{round_no + 1}"]["train"]["rewards"]).mean():.5f},  Avg Running Reward: {np.array(self.logs[f"{round_no + 1}"]["train"]["running_rewards"]).mean():.5f}')
-            print(f'EVAL: Avg Reward: {np.array(self.logs[f"{round_no + 1}"]["eval"]["rewards"]).mean():.5f}')
+            print(f'TRAIN: Avg Reward: {np.array(self.logs[f"{round_no + 1}"]["train"]["rewards"]).mean():.2f},  Avg Running Reward: {np.array(self.logs[f"{round_no + 1}"]["train"]["running_rewards"]).mean():.2f}')
+            print(f'EVAL: Avg Reward: {np.array(self.logs[f"{round_no + 1}"]["eval"]["rewards"]).mean():.2f}')
 
         
         with open(args.folder_name + "/train.txt", 'w') as convert_file:
@@ -260,5 +272,15 @@ if __name__ == '__main__':
     for i in args.__dict__:
         f.write(f'{i}: {args.__dict__[i]}\n')
     f.close()
-    fl = FederatedLearning(args)
+    # 3, {0:[1,2,3]}, "UAV_network", "None", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1}
+    n_users = 3
+    coverage = {0:[1,2,3]}
+    name = "UAV_network"
+    now_str_1 = now.strftime("%Y-%m-%d %H:%M")
+    folder_name = 'models/' +  now_str_1
+    packet_update_loss = {1:0,2:0,3:0}
+    packet_sample_loss = {1:0,2:0,3:0}
+    periodicity = {1:2,2:1,3:1}
+    UAV_args = UAV_ARGS(n_users, coverage, name, folder_name, packet_update_loss, packet_sample_loss, periodicity)
+    fl = FederatedLearning(args, UAV_args)
     fl.run()

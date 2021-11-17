@@ -24,7 +24,7 @@ import datetime
 import json
 
 
-class FireResetEnv(gym.Wrapper):
+class FireResetEnv(gym.Wrapper): ## not used
     def __init__(self, env=None):
         super(FireResetEnv, self).__init__(env)
         # assert env.unwrapped.get_action_meanings()[1] == 'FIRE'
@@ -69,7 +69,7 @@ class MaxAndSkipEnv(gym.Wrapper):
         return obs
 
 
-class ProcessFrame84(gym.ObservationWrapper):
+class ProcessFrame84(gym.ObservationWrapper): ## not used
     def __init__(self, env=None):
         super(ProcessFrame84, self).__init__(env)
         self.observation_space = gym.spaces.Box(low=0, high=255, shape=(84, 84, 1), dtype=np.uint8)
@@ -93,7 +93,7 @@ class ProcessFrame84(gym.ObservationWrapper):
 
 
 class BufferWrapper(gym.ObservationWrapper):
-    def __init__(self, env, n_steps, dtype=np.float32):
+    def __init__(self, env, n_steps, dtype=np.int):
         super(BufferWrapper, self).__init__(env)
         self.dtype = dtype
         old_space = env.observation_space
@@ -110,7 +110,7 @@ class BufferWrapper(gym.ObservationWrapper):
         return self.buffer
 
 
-class ImageToPyTorch(gym.ObservationWrapper):
+class ImageToPyTorch(gym.ObservationWrapper): ## not used
     def __init__(self, env):
         super(ImageToPyTorch, self).__init__(env)
         old_shape = self.observation_space.shape
@@ -124,12 +124,3 @@ class ImageToPyTorch(gym.ObservationWrapper):
 class ScaledFloatFrame(gym.ObservationWrapper):
     def observation(self, obs):
         return np.array(obs).astype(np.float32) / 255.0
-
-def make_env(env_name):
-    env = gym.make(env_name)
-    env = MaxAndSkipEnv(env)
-    env = FireResetEnv(env)
-    env = ProcessFrame84(env)
-    env = ImageToPyTorch(env)
-    env = BufferWrapper(env, 4)
-    return ScaledFloatFrame(env)
