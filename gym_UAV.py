@@ -11,7 +11,7 @@ import itertools
 UAV_capacity = 1
 BS_capacity = 1
 verbose = True
-action_size = 1 # just placeholder, actually will be calculated later
+# action_size = 1 # just placeholder, actually will be calculated later
 MAX_STEPS = 5
 
 class UAV_network(Env):   # network of UAVs not just a single one
@@ -426,19 +426,20 @@ class UAV_network(Env):   # network of UAVs not just a single one
             done = True
             return self.state, award, done, info
 
-# if __name__ == '__main__':
-#     env = UAV_network(3, {0:[1,2,3]}, "UAV_network", "None", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1})
-#     env.observation_space.sample()
-#     episodes = 1
-#     for episode in range(1, episodes+1):
-#         state = env.reset()
-#         done = False
-#         score = 0 
+if __name__ == '__main__':
+    env = UAV_network(3, {0:[1,2,3]}, "UAV_network", "None", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1})
+    # self, n_users, coverage, name, folder_name, packet_update_loss, packet_sample_loss, periodicity
+    env.observation_space.sample()
+    episodes = 1
+    for episode in range(1, episodes+1):
+        state = env.reset()
+        done = False
+        score = 0 
         
-#         while not done:
-#             #env.render()
-#             # print(f"action_space = {env.action_space}")
-#             action = env.action_space.sample()
-#             n_state, reward, done, info = env.step(action)
-#             score+=reward
-#         print('Episode:{} Score:{}'.format(episode, score))
+        while not done:
+            #env.render()
+            # print(f"action_space = {env.action_space}")
+            action = env.action_space.sample()
+            n_state, reward, done, info = env.step(action)
+            score+=reward
+        print('Episode:{} Score:{}'.format(episode, score))

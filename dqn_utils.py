@@ -53,7 +53,7 @@ class ReplayMemory():
 
 
 class DQN(nn.Module):
-    def __init__(self, num_actions):
+    def __init__(self, num_actions, state_size):
         super(DQN, self).__init__()
         # self.conv1 = nn.Conv2d(4, 32, kernel_size=8, stride=4, padding=0)
         # # self.bn1 = nn.BatchNorm2d(16)
@@ -67,8 +67,7 @@ class DQN(nn.Module):
         self.h3 = nn.Linear(64, 64)
         self.h4 = nn.Linear(64, 64)
         self.h5 = nn.Linear(64, 64)
-        self.h6 = nn.Linear(64, 64)
-        self.h7 = nn.Linear(64, num_actions)
+        self.h6 = nn.Linear(64, num_actions)
         
     def forward(self, inputs):
         out = F.relu(self.h1(inputs))
@@ -77,7 +76,7 @@ class DQN(nn.Module):
         out = F.relu(self.h4(out))
         out = F.relu(self.h5(out))
         out = F.relu(self.h6(out))
-        out = F.relu(self.h7(out))
+        # out = F.relu(self.h7(out))
 
         
         # out = out.view(out.size(0), -1)
@@ -87,7 +86,7 @@ class DQN(nn.Module):
         return out
 
 
-def make_env(env_name, UAV_args):
+def make_env(UAV_args):
     # env = gym.make(env_name, UAV_args) ## biplav
     env = UAV_network(UAV_args.n_users, UAV_args.coverage, UAV_args.name, UAV_args.folder_name, UAV_args.packet_update_loss, UAV_args.packet_sample_loss, UAV_args.periodicity)
     env = MaxAndSkipEnv(env)
@@ -101,19 +100,21 @@ def make_env(env_name, UAV_args):
 
 
 class PongAgent:
-    def __init__(self, args, name = "", UAV_args = UAV_args):
-        self.env = make_env(args.env_name, UAV_args)
+    def __init__(self, args, name, UAV_args):
+        self.env = make_env(UAV_args)
         # self.env = UAV_network(3, {0:[1,2,3]}, "UAV_network", "None", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1}) ## biplav
         self.num_actions = self.env.action_space.n
         
         self.args = args
         self.name = name
         self.UAV_args = UAV_args
+        
+        self.state_size = len(self.env.observation_space.sample())
 
         print(f"inside PongAgent - num_actions = {self.num_actions}, args = {self.args}, name = {self.name}, UAV_args = {self.UAV_args}")
         
-        self.dqn = DQN(self.num_actions)
-        self.target_dqn = DQN(self.num_actions)
+        self.dqn = DQN(self.num_actions, self.state_size)
+        self.target_dqn = DQN(self.num_actions, self.state_size)
         
         if args.use_gpu:
             self.dqn.cuda()

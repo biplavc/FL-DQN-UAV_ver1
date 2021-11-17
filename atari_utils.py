@@ -72,7 +72,7 @@ class MaxAndSkipEnv(gym.Wrapper):
 class ProcessFrame84(gym.ObservationWrapper): ## not used
     def __init__(self, env=None):
         super(ProcessFrame84, self).__init__(env)
-        self.observation_space = gym.spaces.Box(low=0, high=255, shape=(84, 84, 1), dtype=np.uint8)
+        self.observation_space = gym.spaces.Box(low=0, high=255, shape=(84, 84, 1), dtype=np.int)
 
     def observation(self, obs):
         return ProcessFrame84.process(obs)
@@ -115,7 +115,7 @@ class ImageToPyTorch(gym.ObservationWrapper): ## not used
         super(ImageToPyTorch, self).__init__(env)
         old_shape = self.observation_space.shape
         self.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=(old_shape[-1], 
-                                old_shape[0], old_shape[1]), dtype=np.float32)
+                                old_shape[0], old_shape[1]), dtype=np.int)
 
     def observation(self, observation):
         return np.moveaxis(observation, 2, 0)

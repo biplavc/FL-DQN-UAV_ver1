@@ -4,7 +4,7 @@ import numpy as np
 from collections import deque
 
 import time
-import datetime
+import datetime # from datetime 
 
 
 import math
@@ -37,7 +37,7 @@ class ARGS():
         self.env_name = UAV_network(3, {0:[1,2,3]}, "UAV_network", "None", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1})
 
         self.render = False
-        self.episodes = 15_000
+        self.episodes = 150_000
         self.batch_size = 32
         self.epsilon_start = 1.0
         self.epsilon_final=0.02
@@ -96,7 +96,7 @@ class FederatedLearning:
         self.updated_clients = {}
         for i in range(self.args.number_of_samples):
             self.client_names.append(f"client_{i}")
-            self.clients[f"client_{i}"] = PongAgent(args, i)
+            self.clients[f"client_{i}"] = PongAgent(args, name  = i, UAV_args = UAV_args)
             self.updated_clients[f"client_{i}"] = 0
             
             
@@ -107,14 +107,14 @@ class FederatedLearning:
                 client_layer.bias.data = main_layer.bias.data.clone()
                 
             for i in range(self.args.number_of_samples):
-                update(self.clients[self.client_names[i]].dqn.conv1, self.main_agent.dqn.conv1)
-                update(self.clients[self.client_names[i]].dqn.conv2, self.main_agent.dqn.conv2)
-                update(self.clients[self.client_names[i]].dqn.conv3, self.main_agent.dqn.conv3)
+                update(self.clients[self.client_names[i]].dqn.h1, self.main_agent.dqn.h1)
+                update(self.clients[self.client_names[i]].dqn.h2, self.main_agent.dqn.h2)
+                update(self.clients[self.client_names[i]].dqn.h3, self.main_agent.dqn.h3)
+                update(self.clients[self.client_names[i]].dqn.h4, self.main_agent.dqn.h4)
+                update(self.clients[self.client_names[i]].dqn.h5, self.main_agent.dqn.h5)
+                update(self.clients[self.client_names[i]].dqn.h6, self.main_agent.dqn.h6)
                 
-                
-                update(self.clients[self.client_names[i]].dqn.fc1, self.main_agent.dqn.fc1)
-                update(self.clients[self.client_names[i]].dqn.fc2, self.main_agent.dqn.fc2)
-                
+
 
                 del self.clients[self.client_names[i]].buffer
                 self.clients[self.client_names[i]].buffer = ReplayMemory(1000000 // 4)
@@ -130,55 +130,65 @@ class FederatedLearning:
 
     def update_main_agent(self, round_no):
         # meaning
-        conv1_mean_weight = torch.zeros(size=self.main_agent.dqn.conv1.weight.shape).to(device)
-        conv1_mean_bias = torch.zeros(size=self.main_agent.dqn.conv1.bias.shape).to(device)
+        h1_mean_weight = torch.zeros(size=self.main_agent.dqn.h1.weight.shape).to(device)
+        h1_mean_bias = torch.zeros(size=self.main_agent.dqn.h1.bias.shape).to(device)
 
-        conv2_mean_weight = torch.zeros(size=self.main_agent.dqn.conv2.weight.shape).to(device)
-        conv2_mean_bias = torch.zeros(size=self.main_agent.dqn.conv2.bias.shape).to(device)
+        h2_mean_weight = torch.zeros(size=self.main_agent.dqn.h2.weight.shape).to(device)
+        h2_mean_bias = torch.zeros(size=self.main_agent.dqn.h2.bias.shape).to(device)
 
-        conv3_mean_weight = torch.zeros(size=self.main_agent.dqn.conv3.weight.shape).to(device)
-        conv3_mean_bias = torch.zeros(size=self.main_agent.dqn.conv3.bias.shape).to(device)
+        h3_mean_weight = torch.zeros(size=self.main_agent.dqn.h3.weight.shape).to(device)
+        h3_mean_bias = torch.zeros(size=self.main_agent.dqn.h3.bias.shape).to(device)
 
-        linear1_mean_weight = torch.zeros(size=self.main_agent.dqn.fc1.weight.shape).to(device)
-        linear1_mean_bias = torch.zeros(size=self.main_agent.dqn.fc1.bias.shape).to(device)
+        h4_mean_weight = torch.zeros(size=self.main_agent.dqn.h4.weight.shape).to(device)
+        h4_mean_bias = torch.zeros(size=self.main_agent.dqn.h4.bias.shape).to(device)
 
-        linear2_mean_weight = torch.zeros(size=self.main_agent.dqn.fc2.weight.shape).to(device)
-        linear2_mean_bias = torch.zeros(size=self.main_agent.dqn.fc2.bias.shape).to(device)
+        h5_mean_weight = torch.zeros(size=self.main_agent.dqn.h5.weight.shape).to(device)
+        h5_mean_bias = torch.zeros(size=self.main_agent.dqn.h5.bias.shape).to(device)
+        
+        h6_mean_weight = torch.zeros(size=self.main_agent.dqn.h6.weight.shape).to(device)
+        h6_mean_bias = torch.zeros(size=self.main_agent.dqn.h6.bias.shape).to(device)
         
         number_of_samples = self.args.number_of_samples
         with torch.no_grad():
 
             for i in range(number_of_samples):
-                conv1_mean_weight += self.clients[self.client_names[i]].dqn.conv1.weight.clone()
-                conv1_mean_bias += self.clients[self.client_names[i]].dqn.conv1.bias.clone()
+                h1_mean_weight += self.clients[self.client_names[i]].dqn.h1.weight.clone()
+                h1_mean_bias += self.clients[self.client_names[i]].dqn.h1.bias.clone()
 
-                conv2_mean_weight += self.clients[self.client_names[i]].dqn.conv2.weight.clone()
-                conv2_mean_bias += self.clients[self.client_names[i]].dqn.conv2.bias.clone()
+                h2_mean_weight += self.clients[self.client_names[i]].dqn.h2.weight.clone()
+                h2_mean_bias += self.clients[self.client_names[i]].dqn.h2.bias.clone()
 
-                conv3_mean_weight += self.clients[self.client_names[i]].dqn.conv3.weight.clone()
-                conv3_mean_bias += self.clients[self.client_names[i]].dqn.conv3.bias.clone()
+                h3_mean_weight += self.clients[self.client_names[i]].dqn.h3.weight.clone()
+                h3_mean_bias += self.clients[self.client_names[i]].dqn.h3.bias.clone()
 
-                linear1_mean_weight += self.clients[self.client_names[i]].dqn.fc1.weight.clone()
-                linear1_mean_bias += self.clients[self.client_names[i]].dqn.fc1.bias.clone()
+                h4_mean_weight += self.clients[self.client_names[i]].dqn.h4.weight.clone()
+                h4_mean_bias += self.clients[self.client_names[i]].dqn.h4.bias.clone()
 
-                linear2_mean_weight += self.clients[self.client_names[i]].dqn.fc2.weight.clone()
-                linear2_mean_bias += self.clients[self.client_names[i]].dqn.fc2.bias.clone()
+                h5_mean_weight += self.clients[self.client_names[i]].dqn.h5.weight.clone()
+                h5_mean_bias += self.clients[self.client_names[i]].dqn.h5.bias.clone()
+
+                h6_mean_weight += self.clients[self.client_names[i]].dqn.h6.weight.clone()
+                h6_mean_bias += self.clients[self.client_names[i]].dqn.h6.bias.clone()
 
                 
-            conv1_mean_weight = conv1_mean_weight / number_of_samples
-            conv1_mean_bias = conv1_mean_bias / number_of_samples
+            h1_mean_weight = h1_mean_weight / number_of_samples
+            h1_mean_bias = h1_mean_bias / number_of_samples
 
-            conv2_mean_weight = conv2_mean_weight / number_of_samples
-            conv2_mean_bias = conv2_mean_bias / number_of_samples
+            h2_mean_weight = h2_mean_weight / number_of_samples
+            h2_mean_bias = h2_mean_bias / number_of_samples
 
-            conv3_mean_weight = conv3_mean_weight / number_of_samples
-            conv3_mean_bias = conv3_mean_bias / number_of_samples
+            h3_mean_weight = h3_mean_weight / number_of_samples
+            h3_mean_bias = h3_mean_bias / number_of_samples
 
-            linear1_mean_weight = linear1_mean_weight / number_of_samples
-            linear1_mean_bias = linear1_mean_bias / number_of_samples
+            h4_mean_weight = h4_mean_weight / number_of_samples
+            h4_mean_bias = h4_mean_bias / number_of_samples
 
-            linear2_mean_weight = linear2_mean_weight / number_of_samples
-            linear2_mean_bias = linear2_mean_bias / number_of_samples
+            h5_mean_weight = h5_mean_weight / number_of_samples
+            h5_mean_bias = h5_mean_bias / number_of_samples
+
+            h6_mean_weight = h6_mean_weight / number_of_samples
+            h6_mean_bias = h6_mean_bias / number_of_samples
+  
             
             
             with torch.no_grad():
@@ -186,13 +196,16 @@ class FederatedLearning:
                     main_layer.weight.data = averaged_layer_weight.data.clone()
                     main_layer.bias.data = averaged_layer_bias.data.clone()
                 
-                update(self.main_agent.dqn.conv1, conv1_mean_weight, conv1_mean_bias)
-                update(self.main_agent.dqn.conv2, conv2_mean_weight, conv2_mean_bias)
-                update(self.main_agent.dqn.conv3, conv3_mean_weight, conv3_mean_bias)
+                update(self.main_agent.dqn.h1, h1_mean_weight, h1_mean_bias)
+                update(self.main_agent.dqn.h2, h2_mean_weight, h2_mean_bias)
+                update(self.main_agent.dqn.h3, h3_mean_weight, h3_mean_bias)
+                update(self.main_agent.dqn.h4, h4_mean_weight, h4_mean_bias)
+                update(self.main_agent.dqn.h5, h5_mean_weight, h5_mean_bias)
+                update(self.main_agent.dqn.h6, h6_mean_weight, h6_mean_bias)
                 
                 
-                update(self.main_agent.dqn.fc1, linear1_mean_weight, linear1_mean_bias)
-                update(self.main_agent.dqn.fc2, linear2_mean_weight, linear2_mean_bias)
+                # update(self.main_agent.dqn.fc1, linear1_mean_weight, linear1_mean_bias)
+                # update(self.main_agent.dqn.fc2, linear2_mean_weight, linear2_mean_bias)
             
 
         
@@ -261,7 +274,7 @@ if __name__ == '__main__':
     set_seed(args.seed)
 
     device = torch.device("cuda:0")
-    dtype = torch.float
+    dtype = torch.int
 
     os.makedirs('runs/', exist_ok=True)
     os.makedirs(f'runs/{args.mode}/', exist_ok=True)
@@ -276,8 +289,10 @@ if __name__ == '__main__':
     n_users = 3
     coverage = {0:[1,2,3]}
     name = "UAV_network"
-    now_str_1 = now.strftime("%Y-%m-%d %H:%M")
-    folder_name = 'models/' +  now_str_1
+    # now = datetime.now()
+    now = time.asctime(time.gmtime()).replace(" ", "_").replace(":", "_")
+    # now_str_1 = now.strftime("%Y-%m-%d %H:%M")
+    folder_name = 'models/' +  now
     packet_update_loss = {1:0,2:0,3:0}
     packet_sample_loss = {1:0,2:0,3:0}
     periodicity = {1:2,2:1,3:1}
