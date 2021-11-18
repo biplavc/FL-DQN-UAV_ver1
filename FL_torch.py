@@ -120,7 +120,7 @@ class FederatedLearning:
                 self.clients[self.client_names[i]].buffer = ReplayMemory(1000000 // 4)
 
                 del self.clients[self.client_names[i]].target_dqn
-                self.clients[self.client_names[i]].target_dqn = DQN(self.main_agent.num_actions)
+                self.clients[self.client_names[i]].target_dqn = DQN(self.main_agent.num_actions, self.main_agent.state_size)
                 self.clients[self.client_names[i]].target_dqn.load_state_dict(self.clients[self.client_names[i]].dqn.state_dict()) 
                 
                 if self.args.use_gpu:
@@ -273,7 +273,8 @@ if __name__ == '__main__':
     args = ARGS()
     set_seed(args.seed)
 
-    device = torch.device("cuda:0")
+    # device = torch.device("cuda:0") ## biplav
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  ## https://stackoverflow.com/questions/53266350/how-to-tell-pytorch-to-not-use-the-gpu
     dtype = torch.int
 
     os.makedirs('runs/', exist_ok=True)

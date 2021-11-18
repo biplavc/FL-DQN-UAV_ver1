@@ -10,7 +10,8 @@ from itertools import product
 import itertools
 UAV_capacity = 1
 BS_capacity = 1
-verbose = True
+# verbose = True
+verbose = False
 # action_size = 1 # just placeholder, actually will be calculated later
 MAX_STEPS = 5
 
@@ -163,7 +164,8 @@ class UAV_network(Env):   # network of UAVs not just a single one
         
         # before initializing, save the info    
         # for the first time it is run, BS_age and others haven't even been initialized
-        print(f"initialize_age with self.episode_step={self.episode_step}")
+        if verbose:
+            print(f"initialize_age with self.episode_step={self.episode_step}")
 
         for i in self.user_list:
             # initial age put 1 and not 0 as if 0, in first time step whethere sampled or not, all users age at UAV becomes 1 but for 1, it is different - 2 for not sampled and 1 for sampled
@@ -178,7 +180,8 @@ class UAV_network(Env):   # network of UAVs not just a single one
             self.attempt_update.append(0)
             self.success_update.append(0)
             
-            print(f"self.age_dist_UAV = {self.age_dist_UAV}, self.UAV_age={self.UAV_age}")
+            if verbose:
+                print(f"self.age_dist_UAV = {self.age_dist_UAV}, self.UAV_age={self.UAV_age}")
             
             for i in self.user_list:
                 self.age_dist_UAV[i].append(self.UAV_age[i])
@@ -191,8 +194,6 @@ class UAV_network(Env):   # network of UAVs not just a single one
             if verbose:
                 print(f'\n{self.name} just before reset of {self.name} the age at UAV = {self.UAV_age}, age at BS = {self.BS_age} and these have used to update age_dist_UAV = {self.age_dist_UAV} and age_dist_BS = {self.age_dist_BS}\n')
                 print(f'\n{self.name} in the same reset block, tx_attempts have been updated as tx_attempt_UAV = {self.tx_attempt_UAV} and tx_attempt_BS = {self.tx_attempt_BS}\n')
-        
-
 
     def reset(self):
         self.episode_step +=1
@@ -297,7 +298,6 @@ class UAV_network(Env):   # network of UAVs not just a single one
                 print(f'for {self.name}, episode = {self.episode_step} at first reset')
             return self.reset()
         actual_action = self.map_actions(action)
-        print(f"actual_action={actual_action}, action={action}")
         # action = action.tolist()
 
         # print(f"\n env = {self.name}, self.current_step = {self.current_step}, self.episode_step = {self.episode_step}, action = {action}, type(action) = {type(action)}, (actual_action)={actual_action}") 
@@ -358,10 +358,10 @@ class UAV_network(Env):   # network of UAVs not just a single one
             if i in sampled_users:
                 self.sample_time[i].append(self.current_step)
                 chance_sample_loss = np.round(random.random(), 2)
-                print(f"tx_attempt_UAV={self.tx_attempt_UAV}, i={i}")
                 self.tx_attempt_UAV[i][-1] = self.tx_attempt_UAV[i][-1] + 1
                 self.attempt_sample[-1] = self.attempt_sample[-1] + 1
                 if verbose:
+                    print(f"tx_attempt_UAV={self.tx_attempt_UAV}, i={i}")
                     print(f"for user {i}, chance_sample_loss = {chance_sample_loss} and self.sample_loss = {self.sample_loss[i]} ")
                 if chance_sample_loss > self.sample_loss[i]:
                     if (self.current_step-1)%self.periodicity[i]==0: ## -1 as here time starts from 1
@@ -383,9 +383,9 @@ class UAV_network(Env):   # network of UAVs not just a single one
                     print("user ", i, " was not sampled")
                 self.UAV_age[i] = self.UAV_age[i] + 1
         
-        print(f"slot {self.current_step} ended with state {self.state}")        
                 
         if verbose:
+            print(f"slot {self.current_step} ended with state {self.state}")        
             print(f"time = {self.current_step}, sample_time = {self.sample_time}")
             print(f"{self.name} tx_attempt_UAV has become {self.tx_attempt_UAV}")
             # time.sleep(10)
@@ -431,15 +431,15 @@ if __name__ == '__main__':
     # self, n_users, coverage, name, folder_name, packet_update_loss, packet_sample_loss, periodicity
     env.observation_space.sample()
     episodes = 1
-    for episode in range(1, episodes+1):
-        state = env.reset()
-        done = False
-        score = 0 
+    # for episode in range(1, episodes+1):
+    #     state = env.reset()
+    #     done = False
+    #     score = 0 
         
-        while not done:
-            #env.render()
-            # print(f"action_space = {env.action_space}")
-            action = env.action_space.sample()
-            n_state, reward, done, info = env.step(action)
-            score+=reward
-        print('Episode:{} Score:{}'.format(episode, score))
+    #     while not done:
+    #         #env.render()
+    #         # print(f"action_space = {env.action_space}")
+    #         action = env.action_space.sample()
+    #         n_state, reward, done, info = env.step(action)
+    #         score+=reward
+    #     print('Episode:{} Score:{}'.format(episode, score))

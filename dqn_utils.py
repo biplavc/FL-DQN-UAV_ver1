@@ -89,13 +89,18 @@ class DQN(nn.Module):
 def make_env(UAV_args):
     # env = gym.make(env_name, UAV_args) ## biplav
     env = UAV_network(UAV_args.n_users, UAV_args.coverage, UAV_args.name, UAV_args.folder_name, UAV_args.packet_update_loss, UAV_args.packet_sample_loss, UAV_args.periodicity)
-    env = MaxAndSkipEnv(env)
-    # env = FireResetEnv(env) ## not needed as Take action on reset for environments that are fixed until firing -- https://github.com/openai/baselines/blob/master/baselines/common/atari_wrappers.py
+    # env = MaxAndSkipEnv(env) ## maybe not neede as this relates to combining multiple steps and taking decision after that many steps, whereas we need to do action at every step. biplav
+    
+    # env = FireResetEnv(env) ## not needed as - Take action on reset for environments that are fixed until firing -- https://github.com/openai/baselines/blob/master/baselines/common/atari_wrappers.py biplav
+    
     # env = ProcessFrame84(env) 
+    
     # env = ImageToPyTorch(env)
-    env = BufferWrapper(env, 4) ## biplav, need some clarity
-    # return ScaledFloatFrame(env) ## biplav
-    return env
+    
+    # env = BufferWrapper(env, 1) ## biplav, need some clarity
+    return ScaledFloatFrame(env) ## biplav
+    # env = env.get_current_state()
+    # return env
 
 
 
@@ -111,7 +116,7 @@ class PongAgent:
         
         self.state_size = len(self.env.observation_space.sample())
 
-        print(f"inside PongAgent - num_actions = {self.num_actions}, args = {self.args}, name = {self.name}, UAV_args = {self.UAV_args}")
+        # print(f"inside PongAgent - num_actions = {self.num_actions}, args = {self.args}, name = {self.name}, UAV_args = {self.UAV_args}")
         
         self.dqn = DQN(self.num_actions, self.state_size)
         self.target_dqn = DQN(self.num_actions, self.state_size)
