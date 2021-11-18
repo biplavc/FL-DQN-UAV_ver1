@@ -31,6 +31,17 @@ from dqn_utils import *
 
 os.environ['CUDA_VISIBLE_DEVICES'] = "1"
 
+class NpEncoder(json.JSONEncoder): ## https://www.javaprogramto.com/2019/11/python-typeerror-integer-json-not-serializable.html
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return super(NpEncoder, self).default(obj)
+
 class ARGS():
     def __init__(self):
         # self.env_name = 'PongDeterministic-v4'
@@ -203,12 +214,7 @@ class FederatedLearning:
                 update(self.main_agent.dqn.h5, h5_mean_weight, h5_mean_bias)
                 update(self.main_agent.dqn.h6, h6_mean_weight, h6_mean_bias)
                 
-                
-                # update(self.main_agent.dqn.fc1, linear1_mean_weight, linear1_mean_bias)
-                # update(self.main_agent.dqn.fc2, linear2_mean_weight, linear2_mean_bias)
-            
 
-        
         
     def step(self, idx_users, round_no):
         
@@ -263,7 +269,7 @@ class FederatedLearning:
 
         
         with open(args.folder_name + "/train.txt", 'w') as convert_file:
-             convert_file.write(json.dumps(self.logs))
+             convert_file.write(json.dumps(self.logs, cls=NpEncoder)) ## biplav
                 
         torch.save(self.main_agent.dqn.state_dict(), f'{args.folder_name}/model.pt')
         
