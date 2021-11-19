@@ -1,6 +1,27 @@
 * start from FL_torch.py, set up args for the FederatedLearning(args), directories. Among the args, self.env_name will have the UAV_network properties.
 
-* using the args, the FederatedLearning(args) will set up the main agent in def __init__(self, args). Agent PongAgent is the learning agent with name "main" that will be set up when FederatedLearning(args) is called. see below
+* using the args, the FederatedLearning(args) will set up the main agent in def __init__(self, args). Agent UavAgent is the learning agent with name "main" that will be set up when FederatedLearning(args) is called. see below
 
-** PongAgent is in dqn_utils.py
-**  
+## ARGS parameters 
+
+1. episodes = 150_000, used in UavAgent.step for 10 episodes in FL_torch.py FederatedLearning.step(). Each time there is a step in FL, UavAgent will play via UavAgent.play() for 10 episodes. This value of episodes is not used.
+
+2. number_of_samples = 5 ## looks like this is the number of agents for FL. value is 5 similar to the paper and the way it has been used in indexing the clients in FL_torch.py makes it seem so.
+
+3. fraction = 1 ## number of clients trained in each round. made the change so that each client is trained at each round.
+
+4. local_steps = 50 for FL, 100 for RL
+
+for rounds and episodes - "we trained the agent with 2500 episodes composed of 25 round and in each round 100 episodes are used for training because there is only one agent in this setup" rounds have episodes, but what's the purpose?
+
+5. rounds = 25
+
+6. max_epsilon_steps = local_steps*200
+
+7. 2 folder names, one in ARGS and one in UAV_ARGS
+
+8. sync_target_net_freq = max_epsilon_steps // 10
+
+9. replay_buffer_fill_len = 1_000
+
+10. In FL_torch.py, logs() has train and eval parts. So check out.

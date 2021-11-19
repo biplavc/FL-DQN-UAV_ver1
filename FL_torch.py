@@ -44,7 +44,6 @@ class NpEncoder(json.JSONEncoder): ## https://www.javaprogramto.com/2019/11/pyth
 
 class ARGS():
     def __init__(self):
-        # self.env_name = 'PongDeterministic-v4'
         self.env_name = UAV_network(3, {0:[1,2,3]}, "UAV_network", "None", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1})
 
         self.render = False
@@ -59,16 +58,15 @@ class ARGS():
         self.mode = ["rl", "fl_normal"][1] ## biplav
         
         self.number_of_samples = 5 if self.mode != "rl" else 1
-        self.fraction = 0.4 if self.mode != "rl" else 1
+        self.fraction = 1 if self.mode != "rl" else 1 ## biplav
         self.local_steps = 50 if self.mode != "rl" else 100
         self.rounds = 25 if self.mode != "rl" else 25
         
         
         self.max_epsilon_steps = self.local_steps*200
         self.sync_target_net_freq = self.max_epsilon_steps // 10
-        
-        self.folder_name = f"runs/{self.mode}/" + time.asctime(time.gmtime()).replace(" ", "_").replace(":", "_")
-        
+        now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        self.folder_name = f"runs/{self.mode}/" + now#.replace(" ", "_").replace(":", "_")
         self.replay_buffer_fill_len = 1_000
         
 ## self, n_users, coverage, name, folder_name, packet_update_loss, packet_sample_loss, periodicity
@@ -94,7 +92,7 @@ class FederatedLearning:
     
     def __init__(self, args, UAV_args):
         self.args = args
-        self.main_agent = PongAgent(args, name  ="main", UAV_args = UAV_args)
+        self.main_agent = UavAgent(args, name  ="main", UAV_args = UAV_args)
         # self, args, name = "", UAV_args = UAV_args
         
         self.create_clients()
@@ -107,7 +105,7 @@ class FederatedLearning:
         self.updated_clients = {}
         for i in range(self.args.number_of_samples):
             self.client_names.append(f"client_{i}")
-            self.clients[f"client_{i}"] = PongAgent(args, name  = i, UAV_args = UAV_args)
+            self.clients[f"client_{i}"] = UavAgent(args, name = i, UAV_args = UAV_args)
             self.updated_clients[f"client_{i}"] = 0
             
             
@@ -246,7 +244,7 @@ class FederatedLearning:
         
     def run(self):
         
-        m = max(int(self.args.fraction * self.args.number_of_samples), 1) 
+        # m = max(int(self.args.fraction * self.args.number_of_samples), 1) 
         for round_no in range(self.args.rounds):
             
             self.logs[f"{round_no + 1}"] = {"train": {
@@ -257,7 +255,9 @@ class FederatedLearning:
                                             "rewards": None
                                         }
                                        }
-            idxs_users = np.random.choice(range(self.args.number_of_samples), m, replace=False)
+            # idxs_users = np.random.choice(range(self.args.number_of_samples), m, replace=False) # false ## biplav
+            
+            idxs_users = range(self.args.number_of_samples) ## biplav
 
             for user in idxs_users:
                 self.updated_clients[f"client_{user}"] = round_no + 1
@@ -292,13 +292,10 @@ if __name__ == '__main__':
     for i in args.__dict__:
         f.write(f'{i}: {args.__dict__[i]}\n')
     f.close()
-    # 3, {0:[1,2,3]}, "UAV_network", "None", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1}
     n_users = 3
     coverage = {0:[1,2,3]}
     name = "UAV_network"
-    # now = datetime.now()
-    now = time.asctime(time.gmtime()).replace(" ", "_").replace(":", "_")
-    # now_str_1 = now.strftime("%Y-%m-%d %H:%M")
+    now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     folder_name = 'models/' +  now
     packet_update_loss = {1:0,2:0,3:0}
     packet_sample_loss = {1:0,2:0,3:0}

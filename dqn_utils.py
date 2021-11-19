@@ -104,7 +104,7 @@ def make_env(UAV_args):
 
 
 
-class PongAgent:
+class UavAgent:
     def __init__(self, args, name, UAV_args):
         self.env = make_env(UAV_args)
         # self.env = UAV_network(3, {0:[1,2,3]}, "UAV_network", "None", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1}) ## biplav
@@ -116,7 +116,7 @@ class PongAgent:
         
         self.state_size = len(self.env.observation_space.sample())
 
-        # print(f"inside PongAgent - num_actions = {self.num_actions}, args = {self.args}, name = {self.name}, UAV_args = {self.UAV_args}")
+        # print(f"inside UavAgent - num_actions = {self.num_actions}, args = {self.args}, name = {self.name}, UAV_args = {self.UAV_args}")
         
         self.dqn = DQN(self.num_actions, self.state_size)
         self.target_dqn = DQN(self.num_actions, self.state_size)
@@ -261,7 +261,7 @@ class PongAgent:
             
             # play until it is possible
             while not done:
-                # synchronize target network with estimation network in required frequence
+                # synchronize target network with estimation network in required frequency
                 if (total_steps % sync_target_net_freq) == 0:
                     self.sync_target_network()
 
