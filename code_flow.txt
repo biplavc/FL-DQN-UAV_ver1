@@ -1,6 +1,8 @@
 * start from FL_torch.py, set up args for the FederatedLearning(args), directories. Among the args, self.env_name will have the UAV_network properties.
 
-* using the args, the FederatedLearning(args) will set up the main agent in def __init__(self, args). Agent UavAgent is the learning agent with name "main" that will be set up when FederatedLearning(args) is called. see below
+* using the args, the FederatedLearning(args) will set up the main agent in def __init__(self, args). Agent UavAgent is the learning agent with name "main" that will be set up when FederatedLearning(args) is called. All the other client are also UavAgents
+
+* 
 
 ## ARGS parameters 
 
@@ -10,17 +12,25 @@
 
 3. fraction = 1 ## number of clients trained in each round. made the change so that each client is trained at each round.
 
-4. local_steps = 50 for FL, 100 for RL
+4. local_steps = 50 for FL, 100 for RL, sync_target_net_freq = max_epsilon_steps // 10
+
+each call to FederatedLearning.step() involves a call to the client's/main agent's (both are UavAgents) train method. there for each UavAgent, at each step it will run for local_steps. 
+Each call to train is independent but the update to the weights will be carried forward. 
+
+FederatedLearning.run() -> for each round -> FederatedLearning.step() -> agent.train() -> 
+a) fill buffer by acting for replay_buffer_fill_len times.  
+b) then each agent runs for episodes = local_steps. after every sync_target_net_freq, the target and the actual DQNs are synced.
+c) changes to the DQN are maintained between each rounds as seen in Fig.3 of the paper.
 
 for rounds and episodes - "we trained the agent with 2500 episodes composed of 25 round and in each round 100 episodes are used for training because there is only one agent in this setup" rounds have episodes, but what's the purpose?
 
-5. rounds = 25
+5. rounds = 25. see above point
 
 6. max_epsilon_steps = local_steps*200
 
 7. 2 folder names, one in ARGS and one in UAV_ARGS
 
-8. sync_target_net_freq = max_epsilon_steps // 10
+8. where is the averaging happening? update_clients and update_main_agent of FederatedLearning
 
 9. replay_buffer_fill_len = 1_000
 

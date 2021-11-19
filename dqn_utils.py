@@ -55,12 +55,6 @@ class ReplayMemory():
 class DQN(nn.Module):
     def __init__(self, num_actions, state_size):
         super(DQN, self).__init__()
-        # self.conv1 = nn.Conv2d(4, 32, kernel_size=8, stride=4, padding=0)
-        # # self.bn1 = nn.BatchNorm2d(16)
-        # self.conv2 = nn.Conv2d(32, 64, kernel_size=4, stride=2, padding=0)
-        # # self.bn2 = nn.BatchNorm2d(32)
-        # self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=0)
-        # # self.bn3 = nn.BatchNorm2d(64)
         
         self.h1 = nn.Linear(state_size, 64)
         self.h2 = nn.Linear(64, 64)
@@ -75,14 +69,8 @@ class DQN(nn.Module):
         out = F.relu(self.h3(out))
         out = F.relu(self.h4(out))
         out = F.relu(self.h5(out))
-        out = F.relu(self.h6(out))
-        # out = F.relu(self.h7(out))
+        out = self.h6(out)
 
-        
-        # out = out.view(out.size(0), -1)
-        # out = F.relu(self.fc1(out))
-        # out = self.fc2(out)
-        
         return out
 
 
@@ -123,7 +111,10 @@ class UavAgent:
         
         if args.use_gpu:
             self.dqn.cuda()
-            self.target_dqn.cuda()        
+            self.target_dqn.cuda()    
+            print(f"GPU will be used here")
+        else:
+             print(f"GPU will not be used here")
         
         self.buffer = ReplayMemory(1000000 // 4)
         
@@ -168,7 +159,7 @@ class UavAgent:
             return np.argmax(actions.data.cpu().numpy())
 
         
-    def update(self, states, targets, actions):
+    def update(self, states, targets, actions): ## this the forward and backprop to update weights
         targets = self.to_var(torch.unsqueeze(torch.from_numpy(targets).float(), -1))
         actions = self.to_var(torch.unsqueeze(torch.from_numpy(actions).long(), -1))
         
@@ -293,5 +284,4 @@ class UavAgent:
             running_rewards.append(running_episode_reward)
             rewards.append(episode_reward)
 
-            
         return rewards, running_rewards

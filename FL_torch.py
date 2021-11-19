@@ -99,7 +99,7 @@ class FederatedLearning:
         
         self.logs = {}
         
-    def create_clients(self):
+    def create_clients(self): 
         self.clients = {}
         self.client_names = []
         self.updated_clients = {}
@@ -122,18 +122,17 @@ class FederatedLearning:
                 update(self.clients[self.client_names[i]].dqn.h4, self.main_agent.dqn.h4)
                 update(self.clients[self.client_names[i]].dqn.h5, self.main_agent.dqn.h5)
                 update(self.clients[self.client_names[i]].dqn.h6, self.main_agent.dqn.h6)
-                
 
 
-                del self.clients[self.client_names[i]].buffer
+                del self.clients[self.client_names[i]].buffer ## clear buffer
                 self.clients[self.client_names[i]].buffer = ReplayMemory(1000000 // 4)
 
                 del self.clients[self.client_names[i]].target_dqn
                 self.clients[self.client_names[i]].target_dqn = DQN(self.main_agent.num_actions, self.main_agent.state_size)
-                self.clients[self.client_names[i]].target_dqn.load_state_dict(self.clients[self.client_names[i]].dqn.state_dict()) 
-                
+                self.clients[self.client_names[i]].target_dqn.load_state_dict(self.clients[self.client_names[i]].dqn.state_dict())
+
                 if self.args.use_gpu:
-                    self.clients[self.client_names[i]].target_dqn.cuda()     
+                    self.clients[self.client_names[i]].target_dqn.cuda()
 
 
 
@@ -262,7 +261,7 @@ class FederatedLearning:
             for user in idxs_users:
                 self.updated_clients[f"client_{user}"] = round_no + 1
                 
-            self.step(idxs_users, round_no+1)
+            self.step(idxs_users, round_no + 1)
             print(f'{round_no + 1}/{self.args.rounds}')
             print(f'TRAIN: Avg Reward: {np.array(self.logs[f"{round_no + 1}"]["train"]["rewards"]).mean():.2f},  Avg Running Reward: {np.array(self.logs[f"{round_no + 1}"]["train"]["running_rewards"]).mean():.2f}')
             print(f'EVAL: Avg Reward: {np.array(self.logs[f"{round_no + 1}"]["eval"]["rewards"]).mean():.2f}')
