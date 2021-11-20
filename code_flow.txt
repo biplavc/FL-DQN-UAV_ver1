@@ -42,13 +42,11 @@ Summary:
 1. Federated Learning - 
 a) create_clients(self) - client names are assigned and FL agents are created
 
-
 b) update_clients(self) -> uses inner method update(client_layer, main_layer) to use the main_layer weights as the client_layer weights.
-
 
 c) update_main_agent -> uses inner method update(main_layer, averaged_layer_weight, averaged_layer_bias) to do the averaging of the weights of the main agent
 
-d) step(self, idx_users, round_no) -> first update_clients(), then run train for each client with episodes = local_episodes. After each agent has been called with train(), update_main_agent()
+d) step(self, idx_users, round_no) -> called from FederatedLearning.run(). first update_clients(), then run train for each client with episodes = local_episodes. After each agent has been called with train(), update_main_agent()
 
 e) run() -> (i)for each round create the logs to save the rewards for both eval and train nets, list them as updated, print eval results, (ii) after all rounds are over, print out logs to train.txt and save the main_agent
 _______________________________________________________________________________________
@@ -79,4 +77,7 @@ e) train(self, replay_buffer_fill_len, batch_size, episodes, max_epsilon_steps, 
 _______________________________________________________________________________________
 _______________________________________________________________________________________
 
-To see final results, check the logs that has the values for eval and train_dqns round-wise.
+*********** results **************
+1. To see final results, check the logs that has the values for eval and train_dqns round-wise.
+
+2. train.txt has all the train and eval results for each rounds. 

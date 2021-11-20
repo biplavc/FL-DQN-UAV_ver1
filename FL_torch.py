@@ -5,6 +5,9 @@ import numpy as np
 
 from collections import deque
 
+# from joblib import Parallel, delayed
+import multiprocessing as mp
+
 import time
 import datetime # from datetime 
 
@@ -44,35 +47,7 @@ class NpEncoder(json.JSONEncoder): ## https://www.javaprogramto.com/2019/11/pyth
         else:
             return super(NpEncoder, self).default(obj)
 
-class ARGS():
-    def __init__(self, mode):
-        self.env_name = UAV_network(3, {0:[1,2,3]}, "UAV_network", "None", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1})
 
-        self.render = False
-        self.episodes = 150_000
-        self.batch_size = 32
-        self.epsilon_start = 1.0
-        self.epsilon_final=0.02
-        self.seed = 1773
-        self.eval_episodes = 100
-        
-        self.use_gpu = torch.cuda.is_available()
-        
-        self.mode = ["rl", "fl_normal"][mode] ## biplav 0 for RL and 1 for FL
-        
-        print(f"starting in {self.mode} mode", flush = True)
-        
-        self.number_of_samples = 5 if self.mode != "rl" else 1
-        self.fraction = 1 if self.mode != "rl" else 1 ## biplav
-        self.local_episodes = 50 if self.mode != "rl" else 100
-        self.rounds = 25 if self.mode != "rl" else 25
-
-
-        self.max_epsilon_steps = self.local_episodes*200 ## 10_000
-        self.sync_target_net_freq = self.max_epsilon_steps // 10 ## 1_000
-        now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        self.folder_name = f"runs/{self.mode}/" + now#.replace(" ", "_").replace(":", "_")
-        self.replay_buffer_fill_len = 1_000
         
 ## self, n_users, coverage, name, folder_name, packet_update_loss, packet_sample_loss, periodicity
 class UAV_ARGS():
@@ -97,10 +72,13 @@ class FederatedLearning:
     
     def __init__(self, args, UAV_args):
         self.args = args
+        self.UAV_args = UAV_args
         self.main_agent = UavAgent(args, name  ="main", UAV_args = UAV_args)
         # self, args, name = "", UAV_args = UAV_args
         
         self.create_clients()
+        
+        print(f"args.folder_name = {args.folder_name}")
         
         self.logs = {}
         
@@ -110,7 +88,7 @@ class FederatedLearning:
         self.updated_clients = {}
         for i in range(self.args.number_of_samples):
             self.client_names.append(f"client_{i}")
-            self.clients[f"client_{i}"] = UavAgent(args, name = i, UAV_args = UAV_args)
+            self.clients[f"client_{i}"] = UavAgent(self.args, i, self.UAV_args)
             self.updated_clients[f"client_{i}"] = 0
             
             
@@ -202,8 +180,7 @@ class FederatedLearning:
             h6_mean_weight = h6_mean_weight / number_of_samples
             h6_mean_bias = h6_mean_bias / number_of_samples
   
-            
-            
+
             with torch.no_grad():
                 def update(main_layer, averaged_layer_weight, averaged_layer_bias):
                     main_layer.weight.data = averaged_layer_weight.data.clone()
@@ -239,13 +216,13 @@ class FederatedLearning:
 
             self.logs[f"{round_no}"]["train"]["rewards"].append(rewards)
             self.logs[f"{round_no}"]["train"]["running_rewards"].append(running_rewards)
-            
+
         # self.update_main_agent(round_no)
         self.update_main_agent() ## biplav
-            
+
         self.logs[f"{round_no}"]["eval"]["rewards"] = self.main_agent.play(self.args.eval_episodes) # biplav
-        
-        
+
+
     def run(self):
         
         # m = max(int(self.args.fraction * self.args.number_of_samples), 1) 
@@ -271,25 +248,66 @@ class FederatedLearning:
             # print(f'TRAIN: Avg Reward: {np.array(self.logs[f"{round_no + 1}"]["train"]["rewards"]).mean():.2f},  Avg Running Reward: {np.array(self.logs[f"{round_no + 1}"]["train"]["running_rewards"]).mean():.2f}', flush = True)
             print(f'EVAL: Avg Reward: {np.array(self.logs[f"{round_no + 1}"]["eval"]["rewards"]).mean():.2f}', flush = True)
 
-        
-        with open(args.folder_name + "/train.txt", 'w') as convert_file:
-             convert_file.write(json.dumps(self.logs, cls=NpEncoder)) ## biplav
+
+        with open(self.args.folder_name + "/train.txt", 'w') as convert_file:
+            convert_file.write(json.dumps(self.logs, cls=NpEncoder)) ## biplav
                 
-        torch.save(self.main_agent.dqn.state_dict(), f'{args.folder_name}/model.pt')
+        torch.save(self.main_agent.dqn.state_dict(), f'{self.args.folder_name}/model.pt')
         
 
-if __name__ == '__main__':
-    print(f"sys.argv = {sys.argv}", flush = True)
-    mode = int(sys.argv[1])
-    args = ARGS(mode=mode)
+def generate_images(logs): ## logs is a dict
+    pass
+    
+    
+class ARGS():
+    def __init__(self, mode, current_time):
+        self.env_name = UAV_network(3, {0:[1,2,3]}, "UAV_network", "None", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1})
+
+        self.render = False
+        self.episodes = 150_000
+        self.batch_size = 32
+        self.epsilon_start = 1.0
+        self.epsilon_final=0.02
+        self.seed = 1773
+        self.eval_episodes = 100
+        
+        self.use_gpu = torch.cuda.is_available()
+        
+        self.mode = ["rl", "fl_normal"][mode] ## biplav 0 for RL and 1 for FL
+        
+        print(f"starting in {self.mode} mode", flush = True)
+        
+        self.number_of_samples = 5 if self.mode != "rl" else 1
+        self.fraction = 1 if self.mode != "rl" else 1 ## biplav
+        self.local_episodes = 50 if self.mode != "rl" else 100
+        self.rounds = 2 if self.mode != "rl" else 2
+
+
+        self.max_epsilon_steps = self.local_episodes*200 ## 10_000
+        self.sync_target_net_freq = self.max_epsilon_steps // 10 ## 1_000
+        # now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        now = current_time
+        os.makedirs('runs/', exist_ok=True)
+        self.folder_name = f"runs/" + now + "/" + self.mode + "/"
+        os.makedirs(f'{self.folder_name}/', exist_ok=True)
+        self.replay_buffer_fill_len = 1_000
+        
+        
+# def start_parallel_execution():
+      
+#     print(f"passed arguments are {arguments}\n", file = open(folder_name + "/results.txt", "a"), flush = True)
+#     print(f"passed arguments are {arguments}")
+
+    # pool.starmap(do_scheduling, [(arg[0], arg[1], arg[2]) for arg in arguments]) ## this enable multiprocessing but I am getting memroy allocation and other CUDA related errors with this, so now using sequential execution
+    
+    # for j in arguments:
+    #     do_scheduling(j[0],j[1],j[2])
+    
+def start_execution(mode, now):
+    args = ARGS(mode = mode, current_time = now)
     set_seed(args.seed)
 
-    # device = torch.device("cuda:0") ## biplav
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  ## https://stackoverflow.com/questions/53266350/how-to-tell-pytorch-to-not-use-the-gpu
-    dtype = torch.int
-
-    os.makedirs('runs/', exist_ok=True)
-    os.makedirs(f'runs/{args.mode}/', exist_ok=True)
+    ## args.folder_name = f"runs/" + now + "/" + self.mode + "/"
     os.makedirs(args.folder_name, exist_ok=True)
 
     # save the hyperparameters in a file
@@ -300,11 +318,25 @@ if __name__ == '__main__':
     n_users = 3
     coverage = {0:[1,2,3]}
     name = "UAV_network"
-    now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    folder_name = 'models/' +  now
+    folder_name = 'models/' +  now ## biplav not used
     packet_update_loss = {1:0,2:0,3:0}
     packet_sample_loss = {1:0,2:0,3:0}
     periodicity = {1:2,2:1,3:1}
     UAV_args = UAV_ARGS(n_users, coverage, name, folder_name, packet_update_loss, packet_sample_loss, periodicity)
     fl = FederatedLearning(args, UAV_args)
+  
     fl.run()
+    generate_images(fl.logs)
+
+
+if __name__ == '__main__':
+    # print(f"sys.argv = {sys.argv}", flush = True)   
+    # mode = int(sys.argv[1])
+    # device = torch.device("cuda:0") ## biplav
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  ## https://stackoverflow.com/questions/53266350/how-to-tell-pytorch-to-not-use-the-gpu
+    dtype = torch.float
+    now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    modes = [0, 1] ## 0 for RL and 1 for FL
+    now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    pool = mp.Pool(mp.cpu_count())
+    pool.starmap(start_execution, [(mode, now) for mode in modes])

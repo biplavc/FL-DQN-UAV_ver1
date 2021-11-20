@@ -1,0 +1,140 @@
+starting in rl mode
+starting in fl_normal mode
+GPU will not be used here
+GPU will not be used here
+starting in fl_normal mode
+starting in rl mode
+GPU will not be used here
+GPU will not be used here
+GPU will not be used here
+GPU will not be used here
+GPU will not be used here
+GPU will not be used here
+GPU will not be used here
+GPU will not be used here
+args.folder_name = runs/2021-11-20_01-29-32/rl/
+Client 0
+args.folder_name = runs/2021-11-20_01-29-32/fl_normal/
+Client 0
+LOCAL TRAIN: Avg Reward: -52.46,  Avg Running Reward: -42.92
+Client 1
+LOCAL TRAIN: Avg Reward: -52.58,  Avg Running Reward: -47.83
+1/2
+EVAL: Avg Reward: -60.00
+Client 0
+LOCAL TRAIN: Avg Reward: -52.64,  Avg Running Reward: -43.14
+Client 2
+LOCAL TRAIN: Avg Reward: -53.20,  Avg Running Reward: -43.63
+Client 3
+LOCAL TRAIN: Avg Reward: -53.02,  Avg Running Reward: -48.19
+2/2
+EVAL: Avg Reward: -60.00
+LOCAL TRAIN: Avg Reward: -53.16,  Avg Running Reward: -43.89
+Client 4
+LOCAL TRAIN: Avg Reward: -52.56,  Avg Running Reward: -43.23
+1/2
+EVAL: Avg Reward: -60.00
+Client 0
+LOCAL TRAIN: Avg Reward: -52.94,  Avg Running Reward: -43.44
+Client 1
+LOCAL TRAIN: Avg Reward: -53.00,  Avg Running Reward: -43.48
+Client 2
+LOCAL TRAIN: Avg Reward: -52.94,  Avg Running Reward: -43.32
+Client 3
+LOCAL TRAIN: Avg Reward: -52.18,  Avg Running Reward: -42.88
+Client 4
+LOCAL TRAIN: Avg Reward: -52.14,  Avg Running Reward: -43.10
+2/2
+EVAL: Avg Reward: -60.00
+starting in rl mode
+starting in fl_normal mode
+GPU will not be used here
+GPU will not be used here
+starting in fl_normal mode
+starting in rl mode
+GPU will not be used here
+GPU will not be used here
+GPU will not be used here
+GPU will not be used here
+GPU will not be used here
+GPU will not be used here
+GPU will not be used here
+GPU will not be used here
+args.folder_name = runs/2021-11-20_01-37-02/rl/
+Client 0
+args.folder_name = runs/2021-11-20_01-37-02/fl_normal/
+Client 0
+LOCAL TRAIN: Avg Reward: -52.46,  Avg Running Reward: -42.92
+Client 1
+LOCAL TRAIN: Avg Reward: -52.58,  Avg Running Reward: -47.83
+1/2
+EVAL: Avg Reward: -60.00
+Client 0
+LOCAL TRAIN: Avg Reward: -52.64,  Avg Running Reward: -43.14
+Client 2
+LOCAL TRAIN: Avg Reward: -53.20,  Avg Running Reward: -43.63
+Client 3
+LOCAL TRAIN: Avg Reward: -53.02,  Avg Running Reward: -48.19
+2/2
+EVAL: Avg Reward: -60.00
+LOCAL TRAIN: Avg Reward: -53.16,  Avg Running Reward: -43.89
+Client 4
+LOCAL TRAIN: Avg Reward: -52.56,  Avg Running Reward: -43.23
+1/2
+EVAL: Avg Reward: -60.00
+Client 0
+LOCAL TRAIN: Avg Reward: -52.94,  Avg Running Reward: -43.44
+Client 1
+LOCAL TRAIN: Avg Reward: -53.00,  Avg Running Reward: -43.48
+Client 2
+LOCAL TRAIN: Avg Reward: -52.94,  Avg Running Reward: -43.32
+Client 3
+LOCAL TRAIN: Avg Reward: -52.18,  Avg Running Reward: -42.88
+Client 4
+LOCAL TRAIN: Avg Reward: -52.14,  Avg Running Reward: -43.10
+2/2
+EVAL: Avg Reward: -60.00
+starting in rl mode
+starting in fl_normal mode
+GPU will not be used here
+GPU will not be used here
+GPU will not be used here
+GPU will not be used here
+GPU will not be used here
+GPU will not be used here
+args.folder_name = runs/2021-11-20_01-37-56/rl/
+Client 0
+GPU will not be used here
+GPU will not be used here
+args.folder_name = runs/2021-11-20_01-37-56/fl_normal/
+Client 0
+LOCAL TRAIN: Avg Reward: -52.46,  Avg Running Reward: -42.92
+Client 1
+LOCAL TRAIN: Avg Reward: -52.58,  Avg Running Reward: -47.83
+LOCAL TRAIN: Avg Reward: -52.64,  Avg Running Reward: -43.14
+Client 2
+1/2
+EVAL: Avg Reward: -60.00
+Client 0
+LOCAL TRAIN: Avg Reward: -53.20,  Avg Running Reward: -43.63
+Client 3
+LOCAL TRAIN: Avg Reward: -53.02,  Avg Running Reward: -48.19
+LOCAL TRAIN: Avg Reward: -53.16,  Avg Running Reward: -43.89
+Client 4
+2/2
+EVAL: Avg Reward: -60.00
+LOCAL TRAIN: Avg Reward: -52.56,  Avg Running Reward: -43.23
+1/2
+EVAL: Avg Reward: -60.00
+Client 0
+LOCAL TRAIN: Avg Reward: -52.94,  Avg Running Reward: -43.44
+Client 1
+LOCAL TRAIN: Avg Reward: -53.00,  Avg Running Reward: -43.48
+Client 2
+LOCAL TRAIN: Avg Reward: -52.94,  Avg Running Reward: -43.32
+Client 3
+LOCAL TRAIN: Avg Reward: -52.18,  Avg Running Reward: -42.88
+Client 4
+LOCAL TRAIN: Avg Reward: -52.14,  Avg Running Reward: -43.10
+2/2
+EVAL: Avg Reward: -60.00

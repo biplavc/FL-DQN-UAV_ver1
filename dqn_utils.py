@@ -212,14 +212,14 @@ class UavAgent:
                 total_reward += reward
                 # self.env.render()
             rewards.append(total_reward)
-            
+
         return rewards
-            
-                
+
+
     def close_env(self):
         self.env.close()
-        
-        
+
+
     def train(self, replay_buffer_fill_len, batch_size, local_episodes,
               max_epsilon_steps, epsilon_start, epsilon_final, sync_target_net_freq):
 
