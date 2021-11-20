@@ -1,4 +1,6 @@
 # import gym
+import sys
+
 import numpy as np
 
 from collections import deque
@@ -43,7 +45,7 @@ class NpEncoder(json.JSONEncoder): ## https://www.javaprogramto.com/2019/11/pyth
             return super(NpEncoder, self).default(obj)
 
 class ARGS():
-    def __init__(self):
+    def __init__(self, mode):
         self.env_name = UAV_network(3, {0:[1,2,3]}, "UAV_network", "None", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1})
 
         self.render = False
@@ -52,19 +54,22 @@ class ARGS():
         self.epsilon_start = 1.0
         self.epsilon_final=0.02
         self.seed = 1773
+        self.eval_episodes = 100
         
         self.use_gpu = torch.cuda.is_available()
         
-        self.mode = ["rl", "fl_normal"][1] ## biplav
+        self.mode = ["rl", "fl_normal"][mode] ## biplav 0 for RL and 1 for FL
+        
+        print(f"starting in {self.mode} mode", flush = True)
         
         self.number_of_samples = 5 if self.mode != "rl" else 1
         self.fraction = 1 if self.mode != "rl" else 1 ## biplav
-        self.local_steps = 50 if self.mode != "rl" else 100
+        self.local_episodes = 50 if self.mode != "rl" else 100
         self.rounds = 25 if self.mode != "rl" else 25
-        
-        
-        self.max_epsilon_steps = self.local_steps*200
-        self.sync_target_net_freq = self.max_epsilon_steps // 10
+
+
+        self.max_epsilon_steps = self.local_episodes*200 ## 10_000
+        self.sync_target_net_freq = self.max_epsilon_steps // 10 ## 1_000
         now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         self.folder_name = f"runs/{self.mode}/" + now#.replace(" ", "_").replace(":", "_")
         self.replay_buffer_fill_len = 1_000
@@ -136,7 +141,7 @@ class FederatedLearning:
 
 
 
-    def update_main_agent(self, round_no):
+    def update_main_agent(self): #, round_no):
         # meaning
         h1_mean_weight = torch.zeros(size=self.main_agent.dqn.h1.weight.shape).to(device)
         h1_mean_bias = torch.zeros(size=self.main_agent.dqn.h1.bias.shape).to(device)
@@ -218,27 +223,27 @@ class FederatedLearning:
         self.update_clients()
         
         for user in idx_users:
-            print(f"Client {user}")
-            
+            print(f"Client {user}", flush = True)
+
             rewards, running_rewards = self.clients[self.client_names[user]].train(
                 replay_buffer_fill_len = self.args.replay_buffer_fill_len, 
                 batch_size = self.args.batch_size, 
-                episodes = self.args.local_steps,
+                local_episodes = self.args.local_episodes,
                 max_epsilon_steps = self.args.max_epsilon_steps,
                 epsilon_start = self.args.epsilon_start - 0.03*(round_no - 1),
                 epsilon_final = self.args.epsilon_final,
                 sync_target_net_freq = self.args.sync_target_net_freq)
-            
-            print(f'LOCAL TRAIN: Avg Reward: {np.array(rewards).mean():.2f},  Avg Running Reward: {np.array(running_rewards).mean():.2f}')
+
+            print(f'LOCAL TRAIN: Avg Reward: {np.array(rewards).mean():.2f},  Avg Running Reward: {np.array(running_rewards).mean():.2f}', flush = True)
             
 
             self.logs[f"{round_no}"]["train"]["rewards"].append(rewards)
             self.logs[f"{round_no}"]["train"]["running_rewards"].append(running_rewards)
             
-        self.update_main_agent(round_no)
+        # self.update_main_agent(round_no)
+        self.update_main_agent() ## biplav
             
-        self.logs[f"{round_no}"]["eval"]["rewards"] = self.main_agent.play(10)
-        
+        self.logs[f"{round_no}"]["eval"]["rewards"] = self.main_agent.play(self.args.eval_episodes) # biplav
         
         
     def run(self):
@@ -255,16 +260,16 @@ class FederatedLearning:
                                         }
                                        }
             # idxs_users = np.random.choice(range(self.args.number_of_samples), m, replace=False) # false ## biplav
-            
+
             idxs_users = range(self.args.number_of_samples) ## biplav
 
             for user in idxs_users:
                 self.updated_clients[f"client_{user}"] = round_no + 1
-                
+
             self.step(idxs_users, round_no + 1)
-            print(f'{round_no + 1}/{self.args.rounds}')
-            print(f'TRAIN: Avg Reward: {np.array(self.logs[f"{round_no + 1}"]["train"]["rewards"]).mean():.2f},  Avg Running Reward: {np.array(self.logs[f"{round_no + 1}"]["train"]["running_rewards"]).mean():.2f}')
-            print(f'EVAL: Avg Reward: {np.array(self.logs[f"{round_no + 1}"]["eval"]["rewards"]).mean():.2f}')
+            print(f'{round_no + 1}/{self.args.rounds}', flush = True)
+            # print(f'TRAIN: Avg Reward: {np.array(self.logs[f"{round_no + 1}"]["train"]["rewards"]).mean():.2f},  Avg Running Reward: {np.array(self.logs[f"{round_no + 1}"]["train"]["running_rewards"]).mean():.2f}', flush = True)
+            print(f'EVAL: Avg Reward: {np.array(self.logs[f"{round_no + 1}"]["eval"]["rewards"]).mean():.2f}', flush = True)
 
         
         with open(args.folder_name + "/train.txt", 'w') as convert_file:
@@ -274,8 +279,9 @@ class FederatedLearning:
         
 
 if __name__ == '__main__':
-    
-    args = ARGS()
+    print(f"sys.argv = {sys.argv}", flush = True)
+    mode = int(sys.argv[1])
+    args = ARGS(mode=mode)
     set_seed(args.seed)
 
     # device = torch.device("cuda:0") ## biplav

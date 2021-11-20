@@ -74,7 +74,7 @@ class DQN(nn.Module):
         return out
 
 
-def make_env(UAV_args):
+def make_env(UAV_args): ## classless
     # env = gym.make(env_name, UAV_args) ## biplav
     env = UAV_network(UAV_args.n_users, UAV_args.coverage, UAV_args.name, UAV_args.folder_name, UAV_args.packet_update_loss, UAV_args.packet_sample_loss, UAV_args.periodicity)
     # env = MaxAndSkipEnv(env) ## maybe not neede as this relates to combining multiple steps and taking decision after that many steps, whereas we need to do action at every step. biplav
@@ -95,7 +95,6 @@ def make_env(UAV_args):
 class UavAgent:
     def __init__(self, args, name, UAV_args):
         self.env = make_env(UAV_args)
-        # self.env = UAV_network(3, {0:[1,2,3]}, "UAV_network", "None", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1}) ## biplav
         self.num_actions = self.env.action_space.n
         
         self.args = args
@@ -104,7 +103,7 @@ class UavAgent:
         
         self.state_size = len(self.env.observation_space.sample())
 
-        # print(f"inside UavAgent - num_actions = {self.num_actions}, args = {self.args}, name = {self.name}, UAV_args = {self.UAV_args}")
+        # print(f"inside UavAgent - num_actions = {self.num_actions}, args = {self.args}, name = {self.name}, UAV_args = {self.UAV_args}", flush = True)
         
         self.dqn = DQN(self.num_actions, self.state_size)
         self.target_dqn = DQN(self.num_actions, self.state_size)
@@ -112,9 +111,9 @@ class UavAgent:
         if args.use_gpu:
             self.dqn.cuda()
             self.target_dqn.cuda()    
-            print(f"GPU will be used here")
+            print(f"GPU will be used here", flush = True)
         else:
-             print(f"GPU will not be used here")
+             print(f"GPU will not be used here", flush = True)
         
         self.buffer = ReplayMemory(1000000 // 4)
         
@@ -159,7 +158,7 @@ class UavAgent:
             return np.argmax(actions.data.cpu().numpy())
 
         
-    def update(self, states, targets, actions): ## this the forward and backprop to update weights
+    def update(self, states, targets, actions): ##  the forward and backprop to update weights, note the difference with the update inner methods of FederatedLearning class
         targets = self.to_var(torch.unsqueeze(torch.from_numpy(targets).float(), -1))
         actions = self.to_var(torch.unsqueeze(torch.from_numpy(actions).long(), -1))
         
@@ -167,9 +166,11 @@ class UavAgent:
         affected_values = torch.gather(predicted_values, 1, actions)
         loss = self.mse_loss(affected_values, targets)
         
-        self.optim.zero_grad()
-        loss.backward()
-        self.optim.step()
+        self.optim.zero_grad() 
+        
+        # https://discuss.pytorch.org/t/what-does-the-backward-function-do/9944/3
+        loss.backward() # computes dloss/dx for every parameter x which has requires_grad=True. These are accumulated into x.grad for every parameter x.
+        self.optim.step() # updates the value of x using the gradient x.grad
 
         
     def get_epsilon(self, total_steps, max_epsilon_steps, epsilon_start, epsilon_final):
@@ -198,10 +199,10 @@ class UavAgent:
         self.sync_target_network()
         
         
-    def play(self, episodes):
+    def play(self, eval_episodes): ## it is to just play after having learnt, like the eval environment
         rewards = []
-        # for i in range(1, episodes + 1):
-        for i in range(0, episodes): # biplav
+        # for i in range(1, eval_episodes + 1):
+        for i in range(0, eval_episodes): # biplav
             done = False
             state = self.env.reset()
             total_reward = 0
@@ -219,7 +220,7 @@ class UavAgent:
         self.env.close()
         
         
-    def train(self, replay_buffer_fill_len, batch_size, episodes,
+    def train(self, replay_buffer_fill_len, batch_size, local_episodes,
               max_epsilon_steps, epsilon_start, epsilon_final, sync_target_net_freq):
 
 
@@ -240,8 +241,8 @@ class UavAgent:
                 self.env.reset()
 
                 
-        # main loop - iterate over episodes
-        for i in range(0, episodes): ## biplav
+        # main loop - iterate over local_episodes
+        for i in range(0, local_episodes): ## biplav 0 to 50
             # reset the environment
             done = False
             state = self.env.reset()
@@ -254,6 +255,7 @@ class UavAgent:
             while not done:
                 # synchronize target network with estimation network in required frequency
                 if (total_steps % sync_target_net_freq) == 0:
+                    # print("synced")
                     self.sync_target_network()
 
                 # calculate epsilon and select greedy action
@@ -273,14 +275,14 @@ class UavAgent:
                 # update weights in the estimation network
                 self.update(s_batch, q_targets, a_batch)
                 
-                # set the state for the next action selction and update counters and reward
+                # set the state for the next action selection and update counters and reward
                 state = next_state
                 total_steps += 1
                 episode_length += 1
                 episode_reward += reward
-                
+
             running_episode_reward = running_episode_reward * 0.9 + 0.1 * episode_reward
-            
+
             running_rewards.append(running_episode_reward)
             rewards.append(episode_reward)
 

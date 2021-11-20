@@ -132,7 +132,7 @@ class UAV_network(Env):   # network of UAVs not just a single one
         self.UAV_list       = list(self.act_coverage.keys())
         
         if verbose:
-            print(f"user list = {self.user_list}, UAV list  = {self.UAV_list}")
+            print(f"user list = {self.user_list}, UAV list  = {self.UAV_list}", flush = True)
         
         self.update_loss    = packet_update_loss
         self.sample_loss    = packet_sample_loss
@@ -142,7 +142,7 @@ class UAV_network(Env):   # network of UAVs not just a single one
 
 
         if verbose:
-            print(f'self.n_users = {self.n_users}, self.n_UAVs = {self.n_UAVs}, self.act_coverage = {self.act_coverage}, self.update_loss = {self.update_loss}, self.sample_loss = {self.sample_loss}, self.UAV_list = {self.UAV_list}, self.user_list = {self.user_list}')
+            print(f'self.n_users = {self.n_users}, self.n_UAVs = {self.n_UAVs}, self.act_coverage = {self.act_coverage}, self.update_loss = {self.update_loss}, self.sample_loss = {self.sample_loss}, self.UAV_list = {self.UAV_list}, self.user_list = {self.user_list}', flush = True)
             # time.sleep(15)
 
         # self.create_action_space()
@@ -157,7 +157,7 @@ class UAV_network(Env):   # network of UAVs not just a single one
             self.tx_attempt_UAV[i] = []   
             
         if verbose:
-            print(f'\n{self.name} started and age_dist_UAV = {self.age_dist_UAV}, age_dist_BS = {self.age_dist_BS}, tx_attempt_BS = {self.tx_attempt_BS}, tx_attempt_UAV = {self.tx_attempt_UAV}\n')
+            print(f'\n{self.name} started and age_dist_UAV = {self.age_dist_UAV}, age_dist_BS = {self.age_dist_BS}, tx_attempt_BS = {self.tx_attempt_BS}, tx_attempt_UAV = {self.tx_attempt_UAV}\n', flush = True)
 
     
     def initialize_age(self):
@@ -165,7 +165,7 @@ class UAV_network(Env):   # network of UAVs not just a single one
         # before initializing, save the info    
         # for the first time it is run, BS_age and others haven't even been initialized
         if verbose:
-            print(f"initialize_age with self.episode_step={self.episode_step}")
+            print(f"initialize_age with self.episode_step={self.episode_step}", flush = True)
 
         for i in self.user_list:
             # initial age put 1 and not 0 as if 0, in first time step whethere sampled or not, all users age at UAV becomes 1 but for 1, it is different - 2 for not sampled and 1 for sampled
@@ -181,7 +181,7 @@ class UAV_network(Env):   # network of UAVs not just a single one
             self.success_update.append(0)
             
             if verbose:
-                print(f"self.age_dist_UAV = {self.age_dist_UAV}, self.UAV_age={self.UAV_age}")
+                print(f"self.age_dist_UAV = {self.age_dist_UAV}, self.UAV_age={self.UAV_age}", flush = True)
             
             for i in self.user_list:
                 self.age_dist_UAV[i].append(self.UAV_age[i])
@@ -192,8 +192,8 @@ class UAV_network(Env):   # network of UAVs not just a single one
                 
 
             if verbose:
-                print(f'\n{self.name} just before reset of {self.name} the age at UAV = {self.UAV_age}, age at BS = {self.BS_age} and these have used to update age_dist_UAV = {self.age_dist_UAV} and age_dist_BS = {self.age_dist_BS}\n')
-                print(f'\n{self.name} in the same reset block, tx_attempts have been updated as tx_attempt_UAV = {self.tx_attempt_UAV} and tx_attempt_BS = {self.tx_attempt_BS}\n')
+                print(f'\n{self.name} just before reset of {self.name} the age at UAV = {self.UAV_age}, age at BS = {self.BS_age} and these have used to update age_dist_UAV = {self.age_dist_UAV} and age_dist_BS = {self.age_dist_BS}\n', flush = True)
+                print(f'\n{self.name} in the same reset block, tx_attempts have been updated as tx_attempt_UAV = {self.tx_attempt_UAV} and tx_attempt_BS = {self.tx_attempt_BS}\n', flush = True)
 
     def reset(self):
         self.episode_step +=1
@@ -202,7 +202,7 @@ class UAV_network(Env):   # network of UAVs not just a single one
         self._episode_ended = False
         self.current_step = 1
         if verbose:
-            print(f'\n{self.name} after reset, episode {self.episode_step} begins with self.state = {self.state} with shape {np.shape(self.state)}\n') 
+            print(f'\n{self.name} after reset, episode {self.episode_step} begins with self.state = {self.state} with shape {np.shape(self.state)}\n', flush = True) 
 
         self.initialize_age()
         return self.state
@@ -212,11 +212,11 @@ class UAV_network(Env):   # network of UAVs not just a single one
         '''
         convert the single integer action to specific sampling and updating tasks
         '''
-        # print(f'inside  map_actions, action={action}, type(action)={type(action)}')
+        # print(f'inside  map_actions, action={action}, type(action)={type(action)}', flush = True)
         # print(f'action={action},self.actions_space={self.actions_space}')
         actual_action = self.actions_space[action]
         if verbose:
-            # print(f'action space is {self.actions_space}, length is {self.action_size}, array size is {len(self.actions_space)} selected action is {action} which maps to {actual_action}')
+            # print(f'action space is {self.actions_space}, length is {self.action_size}, array size is {len(self.actions_space)} selected action is {action} which maps to {actual_action}', flush = True)
             pass
         return actual_action
     
@@ -228,7 +228,7 @@ class UAV_network(Env):   # network of UAVs not just a single one
         self.state = np.concatenate((list([self.current_step]), state_UAV, state_BS), axis=None) 
 
         if verbose:
-            print(f'\nstate from of {self.name} get_current_state() = {self.state} with shape = {np.shape(self.state)}\n') # debug
+            print(f'\nstate from of {self.name} get_current_state() = {self.state} with shape = {np.shape(self.state)}\n', flush = True) # debug
         return (self.state)
     
     def create_action_space(self):
@@ -244,7 +244,7 @@ class UAV_network(Env):   # network of UAVs not just a single one
         else:
             update_user_possibilities = list(combinations(self.user_list, self.BS_capacity)) # different combination of selecting UAVs to update
         if verbose:
-            print(f"self.user_list = {self.user_list}, self.BS_capacity = {self.BS_capacity}, update_user_possibilities = {update_user_possibilities} with length {len(update_user_possibilities)}")
+            print(f"self.user_list = {self.user_list}, self.BS_capacity = {self.BS_capacity}, update_user_possibilities = {update_user_possibilities} with length {len(update_user_possibilities)}", flush = True)
         
         update_user_possibilities = [list(i) for i in update_user_possibilities]
         
@@ -263,7 +263,7 @@ class UAV_network(Env):   # network of UAVs not just a single one
                 sampling_choice = list(combinations(self.act_coverage[k], self.UAV_capacity))
                 sampling_choices[k].extend(sampling_choice)
                 # if verbose:
-                #     print(f"users covered under UAV k are {self.act_coverage[k]}, sampling_choice = {sampling_choice}, and sampling choices has become {sampling_choices}")
+                #     print(f"users covered under UAV k are {self.act_coverage[k]}, sampling_choice = {sampling_choice}, and sampling choices has become {sampling_choices}", flush = True)
 
         all_user_sampling_combinations = []
         for p in itertools.product(*sampling_choices.values()):
@@ -276,8 +276,8 @@ class UAV_network(Env):   # network of UAVs not just a single one
         actions_space = [list(i) for i in actions_space]
             
         if verbose:
-            print(f"sampling_choices = {sampling_choices} with length = {len(sampling_choices)} and \nall_user_sampling_combinations is {all_user_sampling_combinations} with length {len(all_user_sampling_combinations)}")
-            print("\naction_size is ", len(actions_space), " and they are actions_space = ", actions_space)
+            print(f"sampling_choices = {sampling_choices} with length = {len(sampling_choices)} and \nall_user_sampling_combinations is {all_user_sampling_combinations} with length {len(all_user_sampling_combinations)}", flush = True)
+            print("\naction_size is ", len(actions_space), " and they are actions_space = ", actions_space, flush = True)
             # time.sleep(10)
             
             
@@ -285,22 +285,22 @@ class UAV_network(Env):   # network of UAVs not just a single one
         self.action_size = len(self.actions_space)
         
         if verbose:
-            print(f"\n{self.name} has a action_space of size ", np.shape(self.actions_space)) #, " and they are ", self.actions_space,  "\n")
+            print(f"\n{self.name} has a action_space of size ", np.shape(self.actions_space), flush = True) #, " and they are ", self.actions_space,  "\n")
             # time.sleep(10)
             
-        # print("\n action_space is of size ", np.shape(self.actions_space), file = open(self.folder_name + "/results.txt", "a"))
-        # print("\n action_space is of size ", np.shape(self.actions_space), " and they are ", self.actions_space)
+        # print("\n action_space is of size ", np.shape(self.actions_space), file = open(self.folder_name + "/results.txt", "a"), flush = True)
+        # print("\n action_space is of size ", np.shape(self.actions_space), " and they are ", self.actions_space, flush = True)
     
     def step(self, action):
                   
         if self._episode_ended:
             if verbose:
-                print(f'for {self.name}, episode = {self.episode_step} at first reset')
+                print(f'for {self.name}, episode = {self.episode_step} at first reset', flush = True)
             return self.reset()
         actual_action = self.map_actions(action)
         # action = action.tolist()
 
-        # print(f"\n env = {self.name}, self.current_step = {self.current_step}, self.episode_step = {self.episode_step}, action = {action}, type(action) = {type(action)}, (actual_action)={actual_action}") 
+        # print(f"\n env = {self.name}, self.current_step = {self.current_step}, self.episode_step = {self.episode_step}, action = {action}, type(action) = {type(action)}, (actual_action)={actual_action}", flush = True) 
             
         # updated_UAVs  = list(actual_action[0])
         updated_users = list(actual_action[0])
@@ -309,10 +309,10 @@ class UAV_network(Env):   # network of UAVs not just a single one
         sampled_users = list(actual_action[1])
         if verbose:
         
-            print(f'\nfor {self.name}, current_step = {self.current_step}, selected action = {action}, actual_dqn_action={actual_action}, updated_users = {updated_users} sampled_users={sampled_users}\n') 
+            print(f'\nfor {self.name}, current_step = {self.current_step}, selected action = {action}, actual_dqn_action={actual_action}, updated_users = {updated_users} sampled_users={sampled_users}\n', flush = True) 
             # time.sleep(3)
             
-            print(f"{self.name} tx_attempt_BS was {self.tx_attempt_BS}")
+            print(f"{self.name} tx_attempt_BS was {self.tx_attempt_BS}", flush = True)
         
         if self.current_step==1: ## updating
         # step 1 so BS has nothing to get from UAV
@@ -331,28 +331,28 @@ class UAV_network(Env):   # network of UAVs not just a single one
                     self.attempt_update[-1] = self.attempt_update[-1] + 1
                     chance_update_loss = np.round(random.random(), 2)
                     if verbose:
-                    #     print(f"user {i}'s associated UAV is {associated_UAV}")
-                        print(f"for user {i}, chance_update_loss = {chance_update_loss} and {self.name}.update_loss = {self.update_loss[i]} ")
+                    #     print(f"user {i}'s associated UAV is {associated_UAV}", flush = True)
+                        print(f"for user {i}, chance_update_loss = {chance_update_loss} and {self.name}.update_loss = {self.update_loss[i]}", flush = True)
                     if chance_update_loss > self.update_loss[i]:
                         if verbose:
-                            print("user ", i, " was updated")
+                            print("user ", i, " was updated", flush = True)
                         self.BS_age[i] = self.UAV_age[i] + 1 # age for the next slot, like how I update current_sample in my SWIFT work
                         self.success_update[-1] = self.success_update[-1] + 1
                     else:
                         self.BS_age[i] = self.BS_age[i] + 1
                         if verbose:
-                            print(f'user {i} was updated but had update failure')
+                            print(f'user {i} was updated but had update failure', flush = True)
                             
                 else:
                     if verbose:
-                        print("user ", i, " was not updated")
+                        print("user ", i, " was not updated", flush = True)
                     self.BS_age[i] = self.BS_age[i] + 1
                 
         
         if verbose:
-            print(f"{self.name} tx_attempt_BS has become {self.tx_attempt_BS}")
+            print(f"{self.name} tx_attempt_BS has become {self.tx_attempt_BS}", flush = True)
             ## for first step, even if some user was updated, it is not counted in the tx_attempt_BS as that tx has no role in minimizing AoI. Therefore for a scenario with 4 steps, tx_attempt_UAV will go to max 4 but tx_attempt_BS will go to 3 as only 3 attempts are counted
-            print(f"{self.name} tx_attempt_UAV was {self.tx_attempt_UAV}")
+            print(f"{self.name} tx_attempt_UAV was {self.tx_attempt_UAV}", flush = True)
 
         for i in self.user_list: ## sampling
             if i in sampled_users:
@@ -361,33 +361,33 @@ class UAV_network(Env):   # network of UAVs not just a single one
                 self.tx_attempt_UAV[i][-1] = self.tx_attempt_UAV[i][-1] + 1
                 self.attempt_sample[-1] = self.attempt_sample[-1] + 1
                 if verbose:
-                    print(f"tx_attempt_UAV={self.tx_attempt_UAV}, i={i}")
-                    print(f"for user {i}, chance_sample_loss = {chance_sample_loss} and self.sample_loss = {self.sample_loss[i]} ")
+                    print(f"tx_attempt_UAV={self.tx_attempt_UAV}, i={i}", flush = True)
+                    print(f"for user {i}, chance_sample_loss = {chance_sample_loss} and self.sample_loss = {self.sample_loss[i]}", flush = True)
                 if chance_sample_loss > self.sample_loss[i]:
                     if (self.current_step-1)%self.periodicity[i]==0: ## -1 as here time starts from 1
                         if verbose:
-                            print("slot = ", self.current_step-1, " - user ", i, " period = ", self.periodicity[i], " was selected to sample and sampled")
+                            print("slot = ", self.current_step-1, " - user ", i, " period = ", self.periodicity[i], " was selected to sample and sampled", flush = True)
                         self.UAV_age[i] = 1 # age for the next slot, like how I update current_sample in my SWIFT work
                         self.success_sample[-1] = self.success_sample[-1] + 1
                     else:
                         if verbose:
-                            print("slot = ", self.current_step-1, " - user ", i, " period = ", self.periodicity[i], " was selected to sample but not sampled")                    
+                            print("slot = ", self.current_step-1, " - user ", i, " period = ", self.periodicity[i], " was selected to sample but not sampled", flush = True)                    
                 else:
                     self.UAV_age[i] = self.UAV_age[i] + 1
                     if verbose:
-                        print(f'user {i} was sampled but had sample failure')
+                        print(f'user {i} was sampled but had sample failure', flush = True)
                         
                     
             else:
                 if verbose:
-                    print("user ", i, " was not sampled")
+                    print("user ", i, " was not sampled", flush = True)
                 self.UAV_age[i] = self.UAV_age[i] + 1
         
                 
         if verbose:
-            print(f"slot {self.current_step} ended with state {self.state}")        
-            print(f"time = {self.current_step}, sample_time = {self.sample_time}")
-            print(f"{self.name} tx_attempt_UAV has become {self.tx_attempt_UAV}")
+            print(f"slot {self.current_step} ended with state {self.state}", flush = True)
+            print(f"time = {self.current_step}, sample_time = {self.sample_time}", flush = True)
+            print(f"{self.name} tx_attempt_UAV has become {self.tx_attempt_UAV}", flush = True)
             # time.sleep(10)
 
                 
@@ -410,10 +410,10 @@ class UAV_network(Env):   # network of UAVs not just a single one
                    
         
         if verbose:
-            print(f'new current_step = {self.current_step}')
-            print(f"{self.name} tx_attempt_UAV has become {self.tx_attempt_UAV}")
-            print(f"new state is {self.get_current_state()}")
-            print(f'\nfor {self.name}, award is {award}\n') # debug
+            print(f'new current_step = {self.current_step}', flush = True)
+            print(f"{self.name} tx_attempt_UAV has become {self.tx_attempt_UAV}", flush = True)
+            print(f"new state is {self.get_current_state()}", flush = True)
+            print(f'\nfor {self.name}, award is {award}\n', flush = True) # debug
             # time.sleep(10)
 
         info = {}

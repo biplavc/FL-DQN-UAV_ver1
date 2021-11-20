@@ -2,36 +2,81 @@
 
 * using the args, the FederatedLearning(args) will set up the main agent in def __init__(self, args). Agent UavAgent is the learning agent with name "main" that will be set up when FederatedLearning(args) is called. All the other client are also UavAgents
 
-* 
 
 ## ARGS parameters 
 
-1. episodes = 150_000, used in UavAgent.step for 10 episodes in FL_torch.py FederatedLearning.step(). Each time there is a step in FL, UavAgent will play via UavAgent.play() for 10 episodes. This value of episodes is not used.
+1. episodes = 150_000, used in UavAgent.step for eval_episodes episodes in FL_torch.py FederatedLearning.step(). Each time there is a step in FL, UavAgent will play via UavAgent.play() for eval_episodes episodes. This value of episodes is not used.
 
 2. number_of_samples = 5 ## looks like this is the number of agents for FL. value is 5 similar to the paper and the way it has been used in indexing the clients in FL_torch.py makes it seem so.
 
 3. fraction = 1 ## number of clients trained in each round. made the change so that each client is trained at each round.
 
-4. local_steps = 50 for FL, 100 for RL, sync_target_net_freq = max_epsilon_steps // 10
+4. local_episodes = 50 for FL, 100 for RL, sync_target_net_freq = max_epsilon_steps // 10
 
-each call to FederatedLearning.step() involves a call to the client's/main agent's (both are UavAgents) train method. there for each UavAgent, at each step it will run for local_steps. 
+each call to FederatedLearning.step() involves a call to the client's/main agent's (both are UavAgents) train method. there for each UavAgent, at each step it will run for local_episodes. 
 Each call to train is independent but the update to the weights will be carried forward. 
 
 FederatedLearning.run() -> for each round -> FederatedLearning.step() -> agent.train() -> 
 a) fill buffer by acting for replay_buffer_fill_len times.  
-b) then each agent runs for episodes = local_steps. after every sync_target_net_freq, the target and the actual DQNs are synced.
+b) then each agent runs for episodes = local_episodes. after every sync_target_net_freq, the target and the actual DQNs are synced.
 c) changes to the DQN are maintained between each rounds as seen in Fig.3 of the paper.
 
 for rounds and episodes - "we trained the agent with 2500 episodes composed of 25 round and in each round 100 episodes are used for training because there is only one agent in this setup" rounds have episodes, but what's the purpose?
 
 5. rounds = 25. see above point
 
-6. max_epsilon_steps = local_steps*200
+6. max_epsilon_steps = local_episodes*200, used to update the ever decreasing value of epsilon
 
 7. 2 folder names, one in ARGS and one in UAV_ARGS
 
 8. where is the averaging happening? update_clients and update_main_agent of FederatedLearning
 
-9. replay_buffer_fill_len = 1_000
+9. replay_buffer_fill_len = 1_000 ## to initially fill the buffer
 
 10. In FL_torch.py, logs() has train and eval parts. So check out.
+
+
+
+******************* some important methods  ************************
+Summary: 
+1. Federated Learning - 
+a) create_clients(self) - client names are assigned and FL agents are created
+
+
+b) update_clients(self) -> uses inner method update(client_layer, main_layer) to use the main_layer weights as the client_layer weights.
+
+
+c) update_main_agent -> uses inner method update(main_layer, averaged_layer_weight, averaged_layer_bias) to do the averaging of the weights of the main agent
+
+d) step(self, idx_users, round_no) -> first update_clients(), then run train for each client with episodes = local_episodes. After each agent has been called with train(), update_main_agent()
+
+e) run() -> (i)for each round create the logs to save the rewards for both eval and train nets, list them as updated, print eval results, (ii) after all rounds are over, print out logs to train.txt and save the main_agent
+_______________________________________________________________________________________
+
+2. ReplayMemory - 
+a) add(self, state, action, reward, done, next_state) 
+
+b) sample(self, batch_size) 
+
+c) count(self)
+_______________________________________________________________________________________
+
+3. DQN - 
+a) forward(self, inputs) - not sure what is happening.
+
+_______________________________________________________________________________________
+
+4. UavAgent - has 2 DQNs, dqn and target_dqn 
+a) update(self, states, targets, actions) - forward and backprop to update weights. Called in UavAgent.train() after each action.
+
+b) sync_target_network(self) - called in UavAgent.train() to sync the actual network with the estimation network
+
+c) calculate_q_targets(self, next_states, rewards, dones)  - used in qvalue estimation in UavAgent.train()
+
+d) play(self, episodes) - used to run initially to fill buffer and called from FederatedLearning.step(). After all agents have trained and we have a main model, the main_agent is evaluated by playing for eval_episodes
+
+e) train(self, replay_buffer_fill_len, batch_size, episodes, max_epsilon_steps, epsilon_start, epsilon_final, sync_target_net_freq) - (i) first play the game for replay_buffer_fill_len times and fill the UavAgent.buffer. (ii) run the game for FederatedLearning.local_episodes
+_______________________________________________________________________________________
+_______________________________________________________________________________________
+
+To see final results, check the logs that has the values for eval and train_dqns round-wise.
