@@ -81,7 +81,7 @@ class FederatedLearning:
         
         self.create_clients()
         
-        print(f"args.folder_name = {args.folder_name}")
+        print(f"args.folder_name = {args.folder_name}", flush = True)
         
         self.logs = {}
         
@@ -203,7 +203,7 @@ class FederatedLearning:
         self.update_clients()
         
         for user in idx_users:
-            print(f"Client {user}", flush = True)
+            # print(f"Client {user}", flush = True)
 
             rewards, running_rewards = self.clients[self.client_names[user]].train(
                 replay_buffer_fill_len = self.args.replay_buffer_fill_len, 
@@ -227,7 +227,7 @@ class FederatedLearning:
 
         self.logs[f"{round_no}"]["eval"]["rewards"] = eval_results
         
-        print(f"\nround {round} for {self.args.mode} over. Avg reward = {-1*np.mean(eval_results)}")
+        print(f"\nround {round} for {self.args.mode} over. Avg reward = {-1*np.mean(eval_results)}", flush = True)
 
 
     def run(self):
@@ -368,7 +368,7 @@ if __name__ == '__main__':
     # mode = int(sys.argv[1])
     # device = torch.device("cuda:0") ## biplav
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  ## https://stackoverflow.com/questions/53266350/how-to-tell-pytorch-to-not-use-the-gpu
-    print(f"device = {device}")
+    print(f"device = {device}", flush = True)
     dtype = torch.float
     modes = [0, 1] ## 0 for RL and 1 for FL
     now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
