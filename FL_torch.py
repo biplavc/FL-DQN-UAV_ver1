@@ -4,6 +4,7 @@ import sys
 import numpy as np
 import pickle
 from collections import deque
+import collections
 
 # from joblib import Parallel, delayed
 import multiprocessing as mp
@@ -27,6 +28,8 @@ import torchvision.transforms as T
 import os
 import datetime
 import json
+import matplotlib.pyplot as plt
+
 
 from gym_UAV import *
 from atari_utils import *
@@ -34,6 +37,7 @@ from dqn_utils import *
 
 
 os.environ['CUDA_VISIBLE_DEVICES'] = "1"
+
 
 class NpEncoder(json.JSONEncoder): ## https://www.javaprogramto.com/2019/11/python-typeerror-integer-json-not-serializable.html
     def default(self, obj):
@@ -252,40 +256,33 @@ class FederatedLearning:
         with open(self.args.folder_name + "/train.txt", 'w') as convert_file:
             convert_file.write(json.dumps(self.logs, cls=NpEncoder)) ## biplav
         
-        final_round = str(round_no)
-                
+        # od = collections.OrderedDict(sorted(self.logs))
+        
         if self.args.mode == "rl": ## rl
             print(f"pickling the RL results")
-            pickle.dump(self.logs[final_round]["eval"]["rewards"], open(self.args.folder_name + "rl_returns.pickle", "wb"))
-        if self.args.mode == "fl": ## rl
+            pickle.dump(self.logs, open(self.args.folder_name + "rl_returns.pickle", "wb")) ## rl [final_round]["eval"]["rewards"]
+        if self.args.mode == "fl": 
             print(f"pickling the FL results")
-            pickle.dump(self.logs[final_round]["eval"]["rewards"], open(self.args.folder_name + "fl_returns.pickle", "wb"))
+            pickle.dump(self.logs, open(self.args.folder_name + "fl_returns.pickle", "wb")) ## [final_round]["eval"]["rewards"]
 
         torch.save(self.main_agent.dqn.state_dict(), f'{self.args.folder_name}/model.pt')
         
-
-def generate_images(logs): ## logs is a dict
-    pass
-    
+   
     
 class ARGS():
     def __init__(self, mode, current_time):
         self.env_name = UAV_network(3, {0:[1,2,3]}, "UAV_network", "None", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1})
 
         self.render = False
-        self.episodes = 50
+        # self.episodes = 50
         self.batch_size = 32
         self.epsilon_start = 1.0
         self.epsilon_final=0.02
         self.seed = 1773
-        self.eval_episodes = 100
-        
+        self.eval_episodes = 50
         self.use_gpu = torch.cuda.is_available()
-        
         self.mode = ["rl", "fl"][mode] ## biplav 0 for RL and 1 for FL
-        
         print(f"starting in {self.mode} mode", flush = True)
-        
         self.number_of_samples = 5 if self.mode != "rl" else 1
         self.fraction = 1 if self.mode != "rl" else 1 ## biplav
         self.local_episodes = 50 if self.mode != "rl" else 10
@@ -301,9 +298,41 @@ class ARGS():
         os.makedirs(f'{self.folder_name}/', exist_ok=True)
         self.replay_buffer_fill_len = 1_000
         
-def generate_images(logs, rounds):
-    pass
+def generate_images(plot_folder):
+    # plot_folder = runs + now
 
+    path = "/home/biplav/AoI/AoI-FL-UAV_ver1/" + plot_folder
+
+    path_RL = path + "/rl/"
+    path_FL = path + "/fl/"
+
+    rl_returns_dict = pickle.load(open(path_RL + "rl_returns.pickle", "rb"))
+    fl_returns_dict = pickle.load(open(path_FL + "fl_returns.pickle", "rb"))
+
+    rounds_list = sorted(rl_returns_dict.keys())
+
+    eval_results_list_rl = []
+    eval_results_list_fl = []
+
+    for round in rounds_list:
+        eval_results_list_rl.append(-1*np.mean(rl_returns_dict[round]["eval"]["rewards"]))
+        eval_results_list_fl.append(-1*np.mean(fl_returns_dict[round]["eval"]["rewards"]))
+
+    fig, ax1 = plt.subplots()
+    ax1.plot(rounds_list, eval_results_list_rl, label = "RL")
+    ax1.plot(rounds_list, eval_results_list_fl, label = "FL")
+
+    ax1.legend()
+
+    ax1.tick_params(axis='x', labelsize=19)
+    ax1.tick_params(axis='y', labelsize=19)
+    legend = ax1.legend(loc='best', shadow=False, fontsize='19')
+
+    legend.get_frame().set_facecolor('0.90')
+    plt.show
+    plt.xlabel('Rounds', fontsize='20')
+    plt.ylabel('Sum AoI at BS', fontsize='20')
+    plt.savefig(path + '/result.png', bbox_inches='tight')
 
 
 def start_execution(mode, now):
@@ -327,9 +356,7 @@ def start_execution(mode, now):
     periodicity = {1:2,2:1,3:1}
     UAV_args = UAV_ARGS(n_users, coverage, name, folder_name, packet_update_loss, packet_sample_loss, periodicity)
     fl = FederatedLearning(args, UAV_args)
-  
     fl.run()
-    generate_images(fl.logs, fl.args.rounds)
 
 
 if __name__ == '__main__':
@@ -344,3 +371,4 @@ if __name__ == '__main__':
     pool = mp.Pool(mp.cpu_count())
     pool.starmap(start_execution, [(mode, now) for mode in modes])
     pool.close()
+    generate_images("runs/" + now)
