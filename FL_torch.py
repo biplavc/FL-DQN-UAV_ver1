@@ -2,7 +2,7 @@
 import sys
 
 import numpy as np
-
+import pickle
 from collections import deque
 
 # from joblib import Parallel, delayed
@@ -10,7 +10,6 @@ import multiprocessing as mp
 
 import time
 import datetime # from datetime 
-
 
 import math
 import random
@@ -224,7 +223,8 @@ class FederatedLearning:
 
 
     def run(self):
-        
+        print(f"self.args.mode = {self.args.mode}")
+
         # m = max(int(self.args.fraction * self.args.number_of_samples), 1) 
         for round_no in range(self.args.rounds):
             
@@ -251,7 +251,16 @@ class FederatedLearning:
 
         with open(self.args.folder_name + "/train.txt", 'w') as convert_file:
             convert_file.write(json.dumps(self.logs, cls=NpEncoder)) ## biplav
+        
+        final_round = str(round_no)
                 
+        if self.args.mode == "rl": ## rl
+            print(f"pickling the RL results")
+            pickle.dump(self.logs[final_round]["eval"]["rewards"], open(self.args.folder_name + "rl_returns.pickle", "wb"))
+        if self.args.mode == "fl": ## rl
+            print(f"pickling the FL results")
+            pickle.dump(self.logs[final_round]["eval"]["rewards"], open(self.args.folder_name + "fl_returns.pickle", "wb"))
+
         torch.save(self.main_agent.dqn.state_dict(), f'{self.args.folder_name}/model.pt')
         
 
@@ -264,7 +273,7 @@ class ARGS():
         self.env_name = UAV_network(3, {0:[1,2,3]}, "UAV_network", "None", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1})
 
         self.render = False
-        self.episodes = 150_000
+        self.episodes = 50
         self.batch_size = 32
         self.epsilon_start = 1.0
         self.epsilon_final=0.02
@@ -273,13 +282,13 @@ class ARGS():
         
         self.use_gpu = torch.cuda.is_available()
         
-        self.mode = ["rl", "fl_normal"][mode] ## biplav 0 for RL and 1 for FL
+        self.mode = ["rl", "fl"][mode] ## biplav 0 for RL and 1 for FL
         
         print(f"starting in {self.mode} mode", flush = True)
         
         self.number_of_samples = 5 if self.mode != "rl" else 1
         self.fraction = 1 if self.mode != "rl" else 1 ## biplav
-        self.local_episodes = 50 if self.mode != "rl" else 100
+        self.local_episodes = 50 if self.mode != "rl" else 10
         self.rounds = 2 if self.mode != "rl" else 2
 
 
@@ -292,17 +301,11 @@ class ARGS():
         os.makedirs(f'{self.folder_name}/', exist_ok=True)
         self.replay_buffer_fill_len = 1_000
         
-        
-# def start_parallel_execution():
-      
-#     print(f"passed arguments are {arguments}\n", file = open(folder_name + "/results.txt", "a"), flush = True)
-#     print(f"passed arguments are {arguments}")
+def generate_images(logs, rounds):
+    pass
 
-    # pool.starmap(do_scheduling, [(arg[0], arg[1], arg[2]) for arg in arguments]) ## this enable multiprocessing but I am getting memroy allocation and other CUDA related errors with this, so now using sequential execution
-    
-    # for j in arguments:
-    #     do_scheduling(j[0],j[1],j[2])
-    
+
+
 def start_execution(mode, now):
     args = ARGS(mode = mode, current_time = now)
     set_seed(args.seed)
@@ -326,7 +329,7 @@ def start_execution(mode, now):
     fl = FederatedLearning(args, UAV_args)
   
     fl.run()
-    generate_images(fl.logs)
+    generate_images(fl.logs, fl.args.rounds)
 
 
 if __name__ == '__main__':
@@ -340,3 +343,4 @@ if __name__ == '__main__':
     now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     pool = mp.Pool(mp.cpu_count())
     pool.starmap(start_execution, [(mode, now) for mode in modes])
+    pool.close()
