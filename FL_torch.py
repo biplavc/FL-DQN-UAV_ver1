@@ -214,7 +214,7 @@ class FederatedLearning:
                 epsilon_final = self.args.epsilon_final,
                 sync_target_net_freq = self.args.sync_target_net_freq)
 
-            print(f'LOCAL TRAIN: Avg Reward: {np.array(rewards).mean():.2f},  Avg Running Reward: {np.array(running_rewards).mean():.2f}', flush = True)
+            # print(f'LOCAL TRAIN: Avg Reward: {np.array(rewards).mean():.2f},  Avg Running Reward: {np.array(running_rewards).mean():.2f}', flush = True)
             
 
             self.logs[f"{round_no}"]["train"]["rewards"].append(rewards)
@@ -222,8 +222,12 @@ class FederatedLearning:
 
         # self.update_main_agent(round_no)
         self.update_main_agent() ## biplav
+        
+        eval_results = self.main_agent.play(self.args.eval_episodes) # biplav
 
-        self.logs[f"{round_no}"]["eval"]["rewards"] = self.main_agent.play(self.args.eval_episodes) # biplav
+        self.logs[f"{round_no}"]["eval"]["rewards"] = eval_results
+        
+        print(f"\nround {round} for {self.args.mode} over. Avg reward = {-1*np.mean(eval_results)}")
 
 
     def run(self):
@@ -350,7 +354,7 @@ def start_execution(mode, now):
     n_users = 3
     coverage = {0:[1,2,3]}
     name = "UAV_network"
-    folder_name = 'models/' +  now ## biplav not used
+    # folder_name = 'models/' +  now ## biplav not used
     packet_update_loss = {1:0,2:0,3:0}
     packet_sample_loss = {1:0,2:0,3:0}
     periodicity = {1:2,2:1,3:1}
