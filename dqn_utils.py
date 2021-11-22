@@ -174,7 +174,8 @@ class UavAgent:
 
         
     def get_epsilon(self, total_steps, max_epsilon_steps, epsilon_start, epsilon_final):
-        return max(epsilon_final, epsilon_start - total_steps / max_epsilon_steps)
+        return 0.05
+        # return max(epsilon_final, epsilon_start - total_steps / max_epsilon_steps)
 
     
     def sync_target_network(self):

@@ -13,7 +13,7 @@ BS_capacity = 1
 # verbose = True
 verbose = False
 # action_size = 1 # just placeholder, actually will be calculated later
-MAX_STEPS = 5
+MAX_STEPS = 10
 
 class UAV_network(Env):   # network of UAVs not just a single one
     

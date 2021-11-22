@@ -276,7 +276,7 @@ class ARGS():
         self.render = False
         # self.episodes = 50
         self.batch_size = 32
-        self.epsilon_start = 1.0
+        self.epsilon_start = 0.5
         self.epsilon_final=0.02
         self.seed = 1773
         self.eval_episodes = 50
@@ -285,12 +285,12 @@ class ARGS():
         print(f"starting in {self.mode} mode", flush = True)
         self.number_of_samples = 5 if self.mode != "rl" else 1
         self.fraction = 1 if self.mode != "rl" else 1 ## biplav
-        self.local_episodes = 50 if self.mode != "rl" else 10
-        self.rounds = 2 if self.mode != "rl" else 2
+        self.local_episodes = 500 if self.mode != "rl" else 100
+        self.rounds = 20 if self.mode != "rl" else 10
 
 
         self.max_epsilon_steps = self.local_episodes*200 ## 10_000
-        self.sync_target_net_freq = self.max_epsilon_steps // 10 ## 1_000
+        self.sync_target_net_freq = 100 # self.max_epsilon_steps // 10 ## 1_000
         # now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         now = current_time
         os.makedirs('runs/', exist_ok=True)
@@ -301,7 +301,7 @@ class ARGS():
 def generate_images(plot_folder):
     # plot_folder = runs + now
 
-    path = "/home/biplav/AoI/AoI-FL-UAV_ver1/" + plot_folder
+    path = plot_folder
 
     path_RL = path + "/rl/"
     path_FL = path + "/fl/"
@@ -330,8 +330,8 @@ def generate_images(plot_folder):
 
     legend.get_frame().set_facecolor('0.90')
     plt.show
-    plt.xlabel('Rounds', fontsize='20')
-    plt.ylabel('Sum AoI at BS', fontsize='20')
+    plt.xlabel('Rounds', fontsize='10')
+    plt.ylabel('Sum AoI at BS', fontsize='15')
     plt.savefig(path + '/result.png', bbox_inches='tight')
 
 
@@ -364,8 +364,8 @@ if __name__ == '__main__':
     # mode = int(sys.argv[1])
     # device = torch.device("cuda:0") ## biplav
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")  ## https://stackoverflow.com/questions/53266350/how-to-tell-pytorch-to-not-use-the-gpu
+    print(f"device = {device}")
     dtype = torch.float
-    now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     modes = [0, 1] ## 0 for RL and 1 for FL
     now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
     pool = mp.Pool(mp.cpu_count())
