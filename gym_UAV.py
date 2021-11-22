@@ -17,7 +17,7 @@ MAX_STEPS = 10
 
 class UAV_network(Env):   # network of UAVs not just a single one
     
-    def __init__(self, n_users, coverage, name, folder_name, packet_update_loss, packet_sample_loss, periodicity): # number of total user and the user-coverage for every UAV
+    def __init__(self, n_users, coverage, name, packet_update_loss, packet_sample_loss, periodicity): # number of total user and the user-coverage for every UAV
         
         '''
         param n_users        : int, no of users.
@@ -85,7 +85,6 @@ class UAV_network(Env):   # network of UAVs not just a single one
         self.tx_attempt_UAV = {}
         self.user_list      = []
         self.UAV_list       = []
-        self.folder_name    = folder_name
         self.update_loss    = {} ## the dicts will be initialized in start_network
         self.sample_loss    = {}
         self.attempt_sample = []
@@ -288,8 +287,7 @@ class UAV_network(Env):   # network of UAVs not just a single one
             print(f"\n{self.name} has a action_space of size ", np.shape(self.actions_space), flush = True) #, " and they are ", self.actions_space,  "\n")
             # time.sleep(10)
             
-        # print("\n action_space is of size ", np.shape(self.actions_space), file = open(self.folder_name + "/results.txt", "a"), flush = True)
-        # print("\n action_space is of size ", np.shape(self.actions_space), " and they are ", self.actions_space, flush = True)
+
     
     def step(self, action):
                   
@@ -427,8 +425,8 @@ class UAV_network(Env):   # network of UAVs not just a single one
             return self.state, award, done, info
 
 if __name__ == '__main__':
-    env = UAV_network(3, {0:[1,2,3]}, "UAV_network", "None", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1})
-    # self, n_users, coverage, name, folder_name, packet_update_loss, packet_sample_loss, periodicity
+    env = UAV_network(3, {0:[1,2,3]}, "UAV_network", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1})
+    # self, n_users, coverage, name, packet_update_loss, packet_sample_loss, periodicity
     env.observation_space.sample()
     episodes = 1
     # for episode in range(1, episodes+1):

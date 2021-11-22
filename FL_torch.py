@@ -54,11 +54,10 @@ class NpEncoder(json.JSONEncoder): ## https://www.javaprogramto.com/2019/11/pyth
         
 ## self, n_users, coverage, name, folder_name, packet_update_loss, packet_sample_loss, periodicity
 class UAV_ARGS():
-    def __init__(self, n_users, coverage, name, folder_name, packet_update_loss, packet_sample_loss, periodicity):
+    def __init__(self, n_users, coverage, name, packet_update_loss, packet_sample_loss, periodicity):
         self.n_users = n_users
         self.coverage = coverage
         self.name = name
-        self.folder_name = folder_name
         self.packet_update_loss = packet_update_loss
         self.packet_sample_loss = packet_sample_loss
         self.periodicity = periodicity
@@ -226,8 +225,6 @@ class FederatedLearning:
         eval_results = self.main_agent.play(self.args.eval_episodes) # biplav
 
         self.logs[f"{round_no}"]["eval"]["rewards"] = eval_results
-        
-        print(f"\nround {round} for {self.args.mode} over. Avg reward = {-1*np.mean(eval_results)}", flush = True)
 
 
     def run(self):
@@ -254,6 +251,7 @@ class FederatedLearning:
             self.step(idxs_users, round_no + 1)
             print(f'{round_no + 1}/{self.args.rounds}', flush = True)
             # print(f'TRAIN: Avg Reward: {np.array(self.logs[f"{round_no + 1}"]["train"]["rewards"]).mean():.2f},  Avg Running Reward: {np.array(self.logs[f"{round_no + 1}"]["train"]["running_rewards"]).mean():.2f}', flush = True)
+            print(f"\nround {round_no} for {self.args.mode} over.", flush = True)
             print(f'EVAL: Avg Reward: {np.array(self.logs[f"{round_no + 1}"]["eval"]["rewards"]).mean():.2f}', flush = True)
 
 
@@ -275,7 +273,7 @@ class FederatedLearning:
     
 class ARGS():
     def __init__(self, mode, current_time):
-        self.env_name = UAV_network(3, {0:[1,2,3]}, "UAV_network", "None", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1})
+        self.env_name = UAV_network(3, {0:[1,2,3]}, "UAV_network", {1:0,2:0,3:0}, {1:0,2:0,3:0}, {1:2,2:1,3:1})
 
         self.render = False
         # self.episodes = 50
@@ -299,7 +297,6 @@ class ARGS():
         now = current_time
         os.makedirs('runs/', exist_ok=True)
         self.folder_name = f"runs/" + now + "/" + self.mode + "/"
-        os.makedirs(f'{self.folder_name}/', exist_ok=True)
         self.replay_buffer_fill_len = 1_000
         
 def generate_images(plot_folder):
@@ -358,7 +355,7 @@ def start_execution(mode, now):
     packet_update_loss = {1:0,2:0,3:0}
     packet_sample_loss = {1:0,2:0,3:0}
     periodicity = {1:2,2:1,3:1}
-    UAV_args = UAV_ARGS(n_users, coverage, name, folder_name, packet_update_loss, packet_sample_loss, periodicity)
+    UAV_args = UAV_ARGS(n_users, coverage, name, packet_update_loss, packet_sample_loss, periodicity)
     fl = FederatedLearning(args, UAV_args)
     fl.run()
 

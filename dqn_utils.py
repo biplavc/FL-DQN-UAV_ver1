@@ -76,7 +76,7 @@ class DQN(nn.Module):
 
 def make_env(UAV_args): ## classless
     # env = gym.make(env_name, UAV_args) ## biplav
-    env = UAV_network(UAV_args.n_users, UAV_args.coverage, UAV_args.name, UAV_args.folder_name, UAV_args.packet_update_loss, UAV_args.packet_sample_loss, UAV_args.periodicity)
+    env = UAV_network(UAV_args.n_users, UAV_args.coverage, UAV_args.name, UAV_args.packet_update_loss, UAV_args.packet_sample_loss, UAV_args.periodicity)
     # env = MaxAndSkipEnv(env) ## maybe not neede as this relates to combining multiple steps and taking decision after that many steps, whereas we need to do action at every step. biplav
     
     # env = FireResetEnv(env) ## not needed as - Take action on reset for environments that are fixed until firing -- https://github.com/openai/baselines/blob/master/baselines/common/atari_wrappers.py biplav
