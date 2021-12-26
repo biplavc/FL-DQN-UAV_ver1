@@ -8,8 +8,8 @@ import operator
 from itertools import combinations
 from itertools import product 
 import itertools
-UAV_capacity = 1
-BS_capacity = 1
+UAV_capacity = 2
+BS_capacity = 2
 # verbose = True
 verbose = False
 # action_size = 1 # just placeholder, actually will be calculated later

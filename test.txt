@@ -1,0 +1,97 @@
+device = cpu
+starting in rl mode
+starting in fl mode
+GPU will not be used here
+GPU will not be used here
+GPU will not be used here
+GPU will not be used here
+args.folder_name = runs/2021-11-27_11-11-43/rl/
+GPU will not be used here
+GPU will not be used here
+args.folder_name = runs/2021-11-27_11-11-43/fl/
+self.args.mode = rl
+
+round 1/20 for rl over. EVAL: Avg Reward: -261.88
+
+round 2/20 for rl over. EVAL: Avg Reward: -302.16
+self.args.mode = fl
+
+round 1/20 for fl over. EVAL: Avg Reward: -253.48
+
+round 3/20 for rl over. EVAL: Avg Reward: -300.08
+
+round 4/20 for rl over. EVAL: Avg Reward: -301.22
+
+round 5/20 for rl over. EVAL: Avg Reward: -345.08
+
+round 2/20 for fl over. EVAL: Avg Reward: -301.14
+
+round 6/20 for rl over. EVAL: Avg Reward: -345.06
+
+round 7/20 for rl over. EVAL: Avg Reward: -300.26
+
+round 8/20 for rl over. EVAL: Avg Reward: -300.18
+
+round 3/20 for fl over. EVAL: Avg Reward: -301.10
+
+round 9/20 for rl over. EVAL: Avg Reward: -300.30
+
+round 10/20 for rl over. EVAL: Avg Reward: -345.16
+
+round 11/20 for rl over. EVAL: Avg Reward: -345.06
+
+round 4/20 for fl over. EVAL: Avg Reward: -300.24
+
+round 12/20 for rl over. EVAL: Avg Reward: -300.10
+
+round 13/20 for rl over. EVAL: Avg Reward: -300.10
+
+round 5/20 for fl over. EVAL: Avg Reward: -300.16
+
+round 14/20 for rl over. EVAL: Avg Reward: -345.04
+
+round 15/20 for rl over. EVAL: Avg Reward: -280.20
+
+round 16/20 for rl over. EVAL: Avg Reward: -300.18
+
+round 6/20 for fl over. EVAL: Avg Reward: -300.70
+
+round 17/20 for rl over. EVAL: Avg Reward: -345.06
+
+round 18/20 for rl over. EVAL: Avg Reward: -294.36
+
+round 7/20 for fl over. EVAL: Avg Reward: -300.14
+
+round 19/20 for rl over. EVAL: Avg Reward: -345.04
+
+round 20/20 for rl over. EVAL: Avg Reward: -300.20
+
+round 8/20 for fl over. EVAL: Avg Reward: -293.42
+
+round 9/20 for fl over. EVAL: Avg Reward: -336.10
+
+round 10/20 for fl over. EVAL: Avg Reward: -299.00
+
+round 11/20 for fl over. EVAL: Avg Reward: -301.16
+
+round 12/20 for fl over. EVAL: Avg Reward: -300.06
+
+round 13/20 for fl over. EVAL: Avg Reward: -345.06
+
+round 14/20 for fl over. EVAL: Avg Reward: -300.16
+
+round 15/20 for fl over. EVAL: Avg Reward: -345.10
+
+round 16/20 for fl over. EVAL: Avg Reward: -301.24
+
+round 17/20 for fl over. EVAL: Avg Reward: -322.10
+
+round 18/20 for fl over. EVAL: Avg Reward: -300.24
+
+round 19/20 for fl over. EVAL: Avg Reward: -300.12
+
+round 20/20 for fl over. EVAL: Avg Reward: -300.42
+pickling the RL results
+pickling the FL results
+rounds_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+rounds_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]

@@ -1,7 +1,15 @@
-* start from FL_torch.py, set up args for the FederatedLearning(args), directories. Among the args, self.env_name will have the UAV_network properties.
+1) fl.run() -> inside run, for each round, do step()
+    a) fl.step() -> update_clients(), train(), update_main_agent(), run eval_agent for eval_results
+        i) dqn.update_clients() -> clients get the main agents weight
+        ii) dqn.train() -> fill buffer, run for local_episodes
+        iii) update_main_agent() -> average client's weight to set new main_agent's weight, which will be copied to the clients at the beginning of the next round using update_clients
 
-* using the args, the FederatedLearning(args) will set up the main agent in def __init__(self, args). Agent UavAgent is the learning agent with name "main" that will be set up when FederatedLearning(args) is called. All the other client are also UavAgents
 
+
+## to do
+
+1. update_clients after every action
+2. do the adder function like the wifi paper
 
 ## ARGS parameters 
 

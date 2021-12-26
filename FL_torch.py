@@ -104,8 +104,8 @@ class FederatedLearning:
                 update(self.clients[self.client_names[i]].dqn.h1, self.main_agent.dqn.h1)
                 update(self.clients[self.client_names[i]].dqn.h2, self.main_agent.dqn.h2)
                 update(self.clients[self.client_names[i]].dqn.h3, self.main_agent.dqn.h3)
-                update(self.clients[self.client_names[i]].dqn.h4, self.main_agent.dqn.h4)
-                update(self.clients[self.client_names[i]].dqn.h5, self.main_agent.dqn.h5)
+                # update(self.clients[self.client_names[i]].dqn.h4, self.main_agent.dqn.h4)
+                # update(self.clients[self.client_names[i]].dqn.h5, self.main_agent.dqn.h5)
                 update(self.clients[self.client_names[i]].dqn.h6, self.main_agent.dqn.h6)
 
 
@@ -194,13 +194,13 @@ class FederatedLearning:
                 update(self.main_agent.dqn.h4, h4_mean_weight, h4_mean_bias)
                 update(self.main_agent.dqn.h5, h5_mean_weight, h5_mean_bias)
                 update(self.main_agent.dqn.h6, h6_mean_weight, h6_mean_bias)
-                
 
-        
+
+
     def step(self, idx_users, round_no):
         
         self.update_clients()
-        
+
         for user in idx_users:
             # print(f"Client {user}", flush = True)
 
@@ -223,7 +223,6 @@ class FederatedLearning:
         self.update_main_agent() ## biplav
         
         eval_results = self.main_agent.play(self.args.eval_episodes) # biplav
-
         self.logs[f"{round_no}"]["eval"]["rewards"] = eval_results
 
 
@@ -249,10 +248,9 @@ class FederatedLearning:
                 self.updated_clients[f"client_{user}"] = round_no + 1
 
             self.step(idxs_users, round_no + 1)
-            print(f'{round_no + 1}/{self.args.rounds}', flush = True)
+            # print(f'{round_no + 1}/{self.args.rounds}', flush = True)
             # print(f'TRAIN: Avg Reward: {np.array(self.logs[f"{round_no + 1}"]["train"]["rewards"]).mean():.2f},  Avg Running Reward: {np.array(self.logs[f"{round_no + 1}"]["train"]["running_rewards"]).mean():.2f}', flush = True)
-            print(f"\nround {round_no} for {self.args.mode} over.", flush = True)
-            print(f'EVAL: Avg Reward: {np.array(self.logs[f"{round_no + 1}"]["eval"]["rewards"]).mean():.2f}', flush = True)
+            print(f'\nround {round_no+1}/{self.args.rounds} for {self.args.mode} over. EVAL: Avg Reward: {np.array(self.logs[f"{round_no + 1}"]["eval"]["rewards"]).mean():.2f}', flush = True)
 
 
         with open(self.args.folder_name + "/train.txt", 'w') as convert_file:
@@ -278,21 +276,19 @@ class ARGS():
         self.render = False
         # self.episodes = 50
         self.batch_size = 32
-        self.epsilon_start = 0.5
-        self.epsilon_final=0.02
+        self.epsilon_start = 0.5 ## not used, fixed at 0.05
+        self.epsilon_final= 0.02 ## not used, fixed at 0.05
         self.seed = 1773
         self.eval_episodes = 50
         self.use_gpu = torch.cuda.is_available()
         self.mode = ["rl", "fl"][mode] ## biplav 0 for RL and 1 for FL
         print(f"starting in {self.mode} mode", flush = True)
-        self.number_of_samples = 5 if self.mode != "rl" else 1
-        self.fraction = 1 if self.mode != "rl" else 1 ## biplav
-        self.local_episodes = 500 if self.mode != "rl" else 100
-        self.rounds = 20 if self.mode != "rl" else 10
-
-
+        self.number_of_samples = 3 if self.mode == "fl" else 1
+        self.fraction = 1 if self.mode == "fl" else 1 ## biplav
+        self.local_episodes = 50 if self.mode == "fl" else 50
+        self.rounds = 20 if self.mode != "rl" else 20
         self.max_epsilon_steps = self.local_episodes*200 ## 10_000
-        self.sync_target_net_freq = 100 # self.max_epsilon_steps // 10 ## 1_000
+        self.sync_target_net_freq = 10 # self.max_epsilon_steps // 10 ## 1_000
         # now = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
         now = current_time
         os.makedirs('runs/', exist_ok=True)
@@ -309,15 +305,28 @@ def generate_images(plot_folder):
 
     rl_returns_dict = pickle.load(open(path_RL + "rl_returns.pickle", "rb"))
     fl_returns_dict = pickle.load(open(path_FL + "fl_returns.pickle", "rb"))
+    
+    rounds_list = [int(i) for i in rl_returns_dict.keys()]
 
-    rounds_list = sorted(rl_returns_dict.keys())
-
+    rounds_list = sorted(rounds_list)
+    
+    print(f"rounds_list = {rounds_list}")
+    
     eval_results_list_rl = []
     eval_results_list_fl = []
+    
+    if len(rounds_list) == 1: ## not used, idea was to test for 1 round with multiple episodes but round means doing federating so multiple rounds are needed
+        round = rounds_list[0]
+        eval_results_list_rl = rl_returns_dict[round]["eval"]["rewards"]
+        eval_results_list_fl = fl_returns_dict[round]["eval"]["rewards"]
 
-    for round in rounds_list:
-        eval_results_list_rl.append(-1*np.mean(rl_returns_dict[round]["eval"]["rewards"]))
-        eval_results_list_fl.append(-1*np.mean(fl_returns_dict[round]["eval"]["rewards"]))
+    else:
+        for round in rounds_list:
+            round_str = str(round)
+            eval_results_list_rl.append(-1*np.mean(rl_returns_dict[round_str]["eval"]["rewards"]))
+            eval_results_list_fl.append(-1*np.mean(fl_returns_dict[round_str]["eval"]["rewards"]))
+            
+    print(f"rounds_list = {rounds_list}")
 
     fig, ax1 = plt.subplots()
     ax1.plot(rounds_list, eval_results_list_rl, label = "RL")
@@ -325,7 +334,7 @@ def generate_images(plot_folder):
 
     ax1.legend()
 
-    ax1.tick_params(axis='x', labelsize=19)
+    ax1.tick_params(axis='x', labelsize=10)
     ax1.tick_params(axis='y', labelsize=19)
     legend = ax1.legend(loc='best', shadow=False, fontsize='19')
 
@@ -348,13 +357,13 @@ def start_execution(mode, now):
     for i in args.__dict__:
         f.write(f'{i}: {args.__dict__[i]}\n')
     f.close()
-    n_users = 3
-    coverage = {0:[1,2,3]}
+    n_users = 6
+    coverage = {0:[1,2,3], 1:[4,5,6]}
     name = "UAV_network"
     # folder_name = 'models/' +  now ## biplav not used
-    packet_update_loss = {1:0,2:0,3:0}
-    packet_sample_loss = {1:0,2:0,3:0}
-    periodicity = {1:2,2:1,3:1}
+    packet_update_loss = {1:0,2:0,3:0,4:0,5:0,6:0}
+    packet_sample_loss = {1:0,2:0,3:0,4:0,5:0,6:0}
+    periodicity = {1:1,2:1,3:1,4:1,5:1,6:1}
     UAV_args = UAV_ARGS(n_users, coverage, name, packet_update_loss, packet_sample_loss, periodicity)
     fl = FederatedLearning(args, UAV_args)
     fl.run()

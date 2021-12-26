@@ -64,14 +64,35 @@ class DQN(nn.Module):
         self.h6 = nn.Linear(64, num_actions)
         
     def forward(self, inputs):
-        out = F.relu(self.h1(inputs))
-        out = F.relu(self.h2(out))
-        out = F.relu(self.h3(out))
-        out = F.relu(self.h4(out))
-        out = F.relu(self.h5(out))
-        out = self.h6(out)
+        # ## original starts
+        # out = F.relu(self.h1(inputs))
+        # out = F.relu(self.h2(out))
+        # out = F.relu(self.h3(out))
+        # out = F.relu(self.h4(out))
+        # out = F.relu(self.h5(out))
+        # out = self.h6(out)
+        # return out
+        # ## original ends
 
+        
+        h1 = F.relu(self.h1(inputs))
+        h2 = F.relu(self.h2(h1))
+        h3 = F.relu(self.h3(h2)) + h1
+        h4 = F.relu(self.h4(h3))
+        h5 = F.relu(self.h5(h4)) + h3
+        out = self.h6(h5)
         return out
+        
+        # h1 = F.relu(self.h1(inputs))
+        # h2 = F.relu(self.h2(h1))
+
+        # h3 = F.relu(self.h3(h2))
+        # h4 = F.relu(self.h4(h3)) #+ h2
+
+        # h5 = F.relu(self.h5(h4))
+        # h6 = F.relu(self.h6(h5)) #+ h4
+
+        # return self.out(h6)
 
 
 def make_env(UAV_args): ## classless
